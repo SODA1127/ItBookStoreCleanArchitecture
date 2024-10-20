@@ -1,0 +1,104 @@
+plugins {
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp.plugin)
+    id 'kotlin-kapt'
+    id 'kotlin-parcelize'
+    id 'kotlin-android'
+    id 'dagger.hilt.android.plugin'
+    id("de.mannodermaus.android-junit5") version "1.8.2.1"
+}
+
+android {
+    namespace 'com.soda1127.itbookstorecleanarchitecture'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.soda1127.itbookstorecleanarchitecture"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    kotlinOptions {
+        jvmTarget = '17'
+    }
+
+    viewBinding {
+        enabled true
+    }
+}
+
+dependencies {
+
+    implementation libs.androidx.core.ktx
+    implementation libs.androidx.appcompat
+    implementation libs.material
+    implementation libs.androidx.activity
+    implementation libs.androidx.constraintlayout
+    implementation libs.androidx.viewbinding
+    testImplementation libs.junit
+    androidTestImplementation libs.androidx.junit
+    androidTestImplementation libs.androidx.espresso.core
+
+    // Coroutines
+    implementation libs.kotlinx.coroutines.core
+    implementation libs.kotlinx.coroutines.android
+    testImplementation libs.kotlinx.coroutines.test
+
+
+    // Retfofit2
+    implementation libs.retrofit
+    implementation libs.gson
+    implementation(libs.converter.gson) {
+        exclude group: 'com.google.code.gson', module: 'gson'
+    }
+
+    // OkHttp3
+    implementation libs.okhttp
+    implementation libs.logging.interceptor
+
+    // Glide
+    implementation libs.glide
+    implementation libs.glide.transformations
+    ksp libs.compiler
+
+    // Hilt
+    implementation libs.hilt.android
+    testImplementation libs.hilt.android.testing
+    kapt libs.hilt.android.compiler
+    kaptTest libs.google.hilt.android.compiler
+    kapt libs.androidx.hilt.compiler
+
+    implementation libs.androidx.lifecycle.viewmodel.ktx
+    implementation libs.androidx.fragment.ktx
+
+    // JUnit 5
+    implementation(platform(libs.junit.bom))
+    implementation libs.junit.jupiter.api
+    implementation libs.junit.jupiter.params
+    runtimeOnly libs.junit.platform.launcher
+    runtimeOnly libs.junit.jupiter.engine
+
+    // Test
+    implementation libs.mockk
+
+    testImplementation libs.flow.test.observer
+}
+
+kapt {
+    correctErrorTypes true
+}

@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">ItBookStoreCleanArchitecture</string>
+
+    <string name="search_tab">검색</string>
+    <string name="bookmark_tab">북마크</string>
+
+</resources>
