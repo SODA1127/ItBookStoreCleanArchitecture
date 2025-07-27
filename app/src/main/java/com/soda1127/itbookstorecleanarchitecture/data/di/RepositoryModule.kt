@@ -1,7 +1,11 @@
 package com.soda1127.itbookstorecleanarchitecture.data.di
 
-import com.soda1127.itbookstorecleanarchitecture.data.repository.SearchRepository
-import com.soda1127.itbookstorecleanarchitecture.data.repository.SearchRepositoryImpl
+import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.DefaultBookMemoRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.DefaultBookStoreRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.DefaultBookSearchRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.BookSearchRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -14,8 +18,22 @@ abstract class RepositoryModule {
 
     @Binds
     @Singleton
-    abstract fun bindSearchRepository(
-        searchRepositoryImpl: SearchRepositoryImpl
-    ): SearchRepository
+    abstract fun bindBookSearchRepository(
+        defaultSearchRepository: DefaultBookSearchRepository
+    ): BookSearchRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookStoreRepository(
+        defaultBookStoreRepository: DefaultBookStoreRepository
+    ): BookStoreRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindBookMemoRepository(
+        defaultBookMemoRepository: DefaultBookMemoRepository
+    ): BookMemoRepository
+
+
 
 }

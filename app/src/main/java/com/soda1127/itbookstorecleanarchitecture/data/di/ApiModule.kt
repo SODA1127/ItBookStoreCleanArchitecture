@@ -1,6 +1,6 @@
 package com.soda1127.itbookstorecleanarchitecture.data.di
 
-import com.soda1127.itbookstorecleanarchitecture.data.BookStoreApi
+import com.soda1127.itbookstorecleanarchitecture.data.di.api.BooksApiService
 import com.soda1127.itbookstorecleanarchitecture.data.di.api.ApiClient
 import dagger.Module
 import dagger.Provides
@@ -16,6 +16,6 @@ class ApiModule {
     @Singleton
     fun provideBookStoreApi(
         apiClient: ApiClient
-    ): BookStoreApi = apiClient.provideBookStoreApi()
+    ): BooksApiService = apiClient.provideBookStoreApi()
 
 }

@@ -1,11 +1,11 @@
 package com.soda1127.itbookstorecleanarchitecture.tabs.search
 
 import com.google.gson.Gson
-import com.soda1127.itbookstorecleanarchitecture.data.reponse.BookSearchResultResponse
+import com.soda1127.itbookstorecleanarchitecture.data.response.BookSearchResultResponse
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
-import com.soda1127.itbookstorecleanarchitecture.data.reponse.BookStoreNewResponse
-import com.soda1127.itbookstorecleanarchitecture.data.repository.SearchRepository
-import com.soda1127.itbookstorecleanarchitecture.data.repository.TestSearchRepository
+import com.soda1127.itbookstorecleanarchitecture.data.response.BookStoreNewResponse
+import com.soda1127.itbookstorecleanarchitecture.data.repository.BookSearchRepository
+import com.soda1127.itbookstorecleanarchitecture.data.repository.TestBookSearchRepository
 import com.soda1127.itbookstorecleanarchitecture.response.NEW_BOOKS_RESPONSE
 import com.soda1127.itbookstorecleanarchitecture.response.SEARCH_RESULT_ANDROID
 import com.soda1127.itbookstorecleanarchitecture.testbase.JUnit5Test
@@ -31,7 +31,7 @@ class SearchTabViewModelTest: JUnit5Test() {
     private lateinit var sut: SearchTabViewModel
 
     @MockK
-    lateinit var searchRepository: SearchRepository
+    lateinit var searchRepository: BookSearchRepository
 
     private fun makeBooks() = (0 until 10).map { int ->
         BookEntity(
@@ -81,7 +81,7 @@ class SearchTabViewModelTest: JUnit5Test() {
 
     @Test
     fun check_result_success() = runTest(UnconfinedTestDispatcher()) {
-        searchRepository = TestSearchRepository()
+        searchRepository = TestBookSearchRepository()
         sut = SearchTabViewModel(searchRepository)
 
         sut.stateFlow.test(TestScope()) {

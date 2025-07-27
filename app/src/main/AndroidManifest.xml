@@ -14,15 +14,21 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ItBookStoreCleanArchitecture"
         tools:targetApi="31"
-        android:name=".BookStoreApp">
+        android:name=".screen.BookStoreApp">
         <activity
-            android:name=".MainActivity"
+            android:name=".screen.main.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".screen.detail.BookDetailActivity"
+            android:exported="true">
+
         </activity>
     </application>
 
