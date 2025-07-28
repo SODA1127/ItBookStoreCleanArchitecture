@@ -1,10 +1,8 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main
 
-import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.soda1127.example.bookstore.extensions.hideSoftInput
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.databinding.ActivityMainBinding
@@ -18,7 +16,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(), BottomNavigationView.OnNavigationItemSelectedListener {
+class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
 
     override val binding by viewBinding(ActivityMainBinding::inflate)
 
@@ -30,7 +28,27 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(), BottomN
     }
 
     override fun initViews() = with(binding) {
-        bottomNav.setOnNavigationItemSelectedListener(this@MainActivity)
+        bottomNav.setOnItemSelectedListener { item ->
+            val navigationId = item.itemId
+            if (binding.bottomNav.selectedItemId == navigationId) {
+                scrollTop(navigationId)
+            }
+            when (navigationId) {
+                R.id.menu_new -> {
+                    showFragment(BookNewTabFragment.TAG)
+                    true
+                }
+                R.id.menu_bookmark -> {
+                    showFragment(BookmarkTabFragment.TAG)
+                    true
+                }
+                R.id.menu_history -> {
+                    showFragment(SearchTabFragment.TAG)
+                    true
+                }
+                else -> false
+            }
+        }
     }
 
     override fun observeData() {
@@ -39,28 +57,6 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(), BottomN
                 navigation ?: return@collect
                 binding.bottomNav.selectedItemId = navigation.navigationMenuId
             }
-        }
-    }
-
-    override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        val navigationId = item.itemId
-        if (binding.bottomNav.selectedItemId == navigationId) {
-            scrollTop(navigationId)
-        }
-        return when (navigationId) {
-            R.id.menu_new -> {
-                showFragment(BookNewTabFragment.TAG)
-                true
-            }
-            R.id.menu_bookmark -> {
-                showFragment(BookmarkTabFragment.TAG)
-                true
-            }
-            R.id.menu_history -> {
-                showFragment(SearchTabFragment.TAG)
-                true
-            }
-            else -> false
         }
     }
 
