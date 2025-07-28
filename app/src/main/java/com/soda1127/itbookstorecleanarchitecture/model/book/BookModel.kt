@@ -1,6 +1,6 @@
 package com.soda1127.itbookstorecleanarchitecture.model.book
 
-import com.soda1127.example.bookstore.model.CellType
+import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.model.Model
 

@@ -3,7 +3,6 @@ package com.soda1127.itbookstorecleanarchitecture.model
 import android.annotation.SuppressLint
 import androidx.annotation.NonNull
 import androidx.recyclerview.widget.DiffUtil
-import com.soda1127.example.bookstore.model.CellType
 
 abstract class Model(
     open val id: String,

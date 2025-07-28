@@ -4,8 +4,8 @@ import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.soda1127.itbookstorecleanarchitecture.extensions.clear
 import com.soda1127.itbookstorecleanarchitecture.extensions.load
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
-import com.soda1127.example.bookstore.widget.adapter.listener.books.BooksListener
-import com.soda1127.example.bookstore.widget.viewholder.ModelViewHolder
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.books.BooksListener
+import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.ModelViewHolder
 import com.soda1127.itbookstorecleanarchitecture.databinding.ViewholderBookBinding
 
 class BookViewHolder(

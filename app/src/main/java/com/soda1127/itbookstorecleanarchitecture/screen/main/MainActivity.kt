@@ -3,7 +3,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main
 import androidx.activity.viewModels
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.soda1127.example.bookstore.extensions.hideSoftInput
+import com.soda1127.itbookstorecleanarchitecture.extensions.hideSoftInput
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.databinding.ActivityMainBinding
 import com.soda1127.itbookstorecleanarchitecture.extensions.viewBinding

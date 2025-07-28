@@ -1,7 +1,7 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.bookmark
 
 import androidx.lifecycle.viewModelScope
-import com.soda1127.example.bookstore.model.CellType
+import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel

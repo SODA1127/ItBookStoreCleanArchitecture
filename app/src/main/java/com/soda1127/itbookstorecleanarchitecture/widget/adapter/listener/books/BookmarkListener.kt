@@ -1,4 +1,4 @@
-package com.soda1127.example.bookstore.widget.adapter.listener.books
+package com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.books
 
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 

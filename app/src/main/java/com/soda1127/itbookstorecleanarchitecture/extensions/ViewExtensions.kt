@@ -1,4 +1,4 @@
-package com.soda1127.example.bookstore.extensions
+package com.soda1127.itbookstorecleanarchitecture.extensions
 
 import android.content.Context
 import android.view.View

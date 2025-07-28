@@ -1,8 +1,8 @@
 package com.soda1127.itbookstorecleanarchitecture.widget.viewholder.book
 
-import com.soda1127.example.bookstore.model.book.BookLoadingModel
-import com.soda1127.example.bookstore.widget.adapter.listener.AdapterListener
-import com.soda1127.example.bookstore.widget.viewholder.ModelViewHolder
+import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadingModel
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.AdapterListener
+import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.ModelViewHolder
 import com.soda1127.itbookstorecleanarchitecture.databinding.ViewholderBookLoadingBinding
 
 class BookLoadingViewHolder(

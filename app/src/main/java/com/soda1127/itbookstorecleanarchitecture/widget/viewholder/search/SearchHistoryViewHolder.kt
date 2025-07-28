@@ -1,8 +1,8 @@
 package com.soda1127.itbookstorecleanarchitecture.widget.viewholder.search
 
-import com.soda1127.example.bookstore.model.search.SearchHistoryModel
-import com.soda1127.example.bookstore.widget.adapter.listener.search.SearchHistoryListener
-import com.soda1127.example.bookstore.widget.viewholder.ModelViewHolder
+import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.search.SearchHistoryListener
+import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.ModelViewHolder
 import com.soda1127.itbookstorecleanarchitecture.databinding.ViewholderSearchHistoryBinding
 
 class SearchHistoryViewHolder(

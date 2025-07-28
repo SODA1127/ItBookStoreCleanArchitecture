@@ -9,8 +9,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.SimpleItemAnimator
 import com.soda1127.itbookstorecleanarchitecture.model.Model
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
-import com.soda1127.example.bookstore.widget.adapter.ModelRecyclerAdapter
-import com.soda1127.example.bookstore.widget.adapter.listener.books.BookmarkListener
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.ModelRecyclerAdapter
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.books.BookmarkListener
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseFragment
 import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen

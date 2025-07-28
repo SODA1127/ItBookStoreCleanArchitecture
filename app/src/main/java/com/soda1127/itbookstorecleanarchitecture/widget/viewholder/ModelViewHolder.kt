@@ -1,9 +1,9 @@
-package com.soda1127.example.bookstore.widget.viewholder
+package com.soda1127.itbookstorecleanarchitecture.widget.viewholder
 
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.soda1127.itbookstorecleanarchitecture.model.Model
-import com.soda1127.example.bookstore.widget.adapter.listener.AdapterListener
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.AdapterListener
 
 abstract class ModelViewHolder<M: Model, L: AdapterListener>(
     binding: ViewBinding

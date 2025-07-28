@@ -1,7 +1,7 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.search
 
 import com.soda1127.itbookstorecleanarchitecture.model.Model
-import com.soda1127.example.bookstore.model.search.SearchHistoryModel
+import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
 
 sealed class SearchTabState {
 

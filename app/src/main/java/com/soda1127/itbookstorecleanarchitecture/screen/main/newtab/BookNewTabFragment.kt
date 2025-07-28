@@ -10,8 +10,8 @@ import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseFragment
 import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen
 import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity
-import com.soda1127.example.bookstore.widget.adapter.ModelRecyclerAdapter
-import com.soda1127.example.bookstore.widget.adapter.listener.books.BooksListener
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.ModelRecyclerAdapter
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.books.BooksListener
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.databinding.FragmentNewTabBinding
 import com.soda1127.itbookstorecleanarchitecture.extensions.viewBinding

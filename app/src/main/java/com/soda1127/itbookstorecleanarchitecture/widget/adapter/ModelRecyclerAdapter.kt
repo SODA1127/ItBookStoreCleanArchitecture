@@ -1,13 +1,13 @@
-package com.soda1127.example.bookstore.widget.adapter
+package com.soda1127.itbookstorecleanarchitecture.widget.adapter
 
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.soda1127.example.bookstore.model.CellType
+import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.Model
-import com.soda1127.example.bookstore.widget.adapter.listener.AdapterListener
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.AdapterListener
 import com.soda1127.itbookstorecleanarchitecture.widget.adapter.mapper.ModelViewHolderMapper
-import com.soda1127.example.bookstore.widget.viewholder.ModelViewHolder
+import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.ModelViewHolder
 
 class ModelRecyclerAdapter<M : Model, L : AdapterListener>(
     private val adapterListener: L

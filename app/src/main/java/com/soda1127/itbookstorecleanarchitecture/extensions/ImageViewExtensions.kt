@@ -9,7 +9,6 @@ import com.bumptech.glide.load.resource.bitmap.CenterInside
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.transition.DrawableCrossFadeFactory
-import com.soda1127.example.bookstore.extensions.fromDpToPx
 
 private val factory = DrawableCrossFadeFactory.Builder().setCrossFadeEnabled(true).build()
 

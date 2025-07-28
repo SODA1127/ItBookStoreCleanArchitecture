@@ -2,10 +2,10 @@ package com.soda1127.itbookstorecleanarchitecture.widget.adapter.mapper
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import com.soda1127.example.bookstore.model.CellType
+import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.Model
-import com.soda1127.example.bookstore.widget.adapter.listener.AdapterListener
-import com.soda1127.example.bookstore.widget.viewholder.ModelViewHolder
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.AdapterListener
+import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.ModelViewHolder
 import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.book.BookLoadRetryViewHolder
 import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.book.BookLoadingViewHolder
 import com.soda1127.itbookstorecleanarchitecture.widget.viewholder.book.BookViewHolder

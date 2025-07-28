@@ -1,4 +1,4 @@
-package com.soda1127.example.bookstore.model
+package com.soda1127.itbookstorecleanarchitecture.model
 
 enum class CellType {
 

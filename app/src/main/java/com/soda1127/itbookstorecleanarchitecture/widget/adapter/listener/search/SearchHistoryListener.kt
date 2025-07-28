@@ -1,6 +1,6 @@
-package com.soda1127.example.bookstore.widget.adapter.listener.search
+package com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.search
 
-import com.soda1127.example.bookstore.widget.adapter.listener.AdapterListener
+import com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener.AdapterListener
 
 interface SearchHistoryListener: AdapterListener {
 
