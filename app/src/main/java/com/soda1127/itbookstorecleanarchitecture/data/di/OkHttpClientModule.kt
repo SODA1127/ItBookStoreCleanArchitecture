@@ -10,11 +10,9 @@ import java.util.concurrent.TimeUnit
 
 @Module
 @InstallIn(SingletonComponent::class)
-class OkHttpClientModule {
+object OkHttpClientModule {
 
-    companion object {
-        private const val CONNECT_TIMEOUT_MILLIS = 3000L
-    }
+    private const val CONNECT_TIMEOUT_MILLIS = 3000L
 
     @Provides
     fun provideOkhttpBuilder(

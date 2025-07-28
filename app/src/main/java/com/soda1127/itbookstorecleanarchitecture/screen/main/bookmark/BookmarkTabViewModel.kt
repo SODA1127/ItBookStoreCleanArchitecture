@@ -5,12 +5,15 @@ import com.soda1127.example.bookstore.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class BookmarkTabViewModel(
+@HiltViewModel
+class BookmarkTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository
 ): BaseViewModel() {
 

@@ -1,4 +1,4 @@
-package com.soda1127.itbookstorecleanarchitecture.screen.main.new
+package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 
 import androidx.lifecycle.viewModelScope
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel

@@ -1,10 +1,11 @@
 plugins {
-    id 'com.android.application'
-    id 'org.jetbrains.kotlin.android'
-    id "com.google.devtools.ksp"
-    id 'kotlin-parcelize'
-    id 'kotlin-android'
-    id 'com.google.dagger.hilt.android'
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.parcelize)
+
     id("de.mannodermaus.android-junit5") version "1.13.1.0"
 }
 
@@ -30,11 +31,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
     kotlinOptions {
-        jvmTarget = '17'
+        jvmTarget = "1.8"
     }
 
     viewBinding {
@@ -61,17 +62,9 @@ dependencies {
     implementation libs.kotlinx.coroutines.android
     testImplementation libs.kotlinx.coroutines.test
 
-
-    // Retfofit2
-    implementation libs.retrofit
+    // Retrofit & OkHttp
+    implementation(libs.bundles.retrofit)
     implementation libs.gson
-    implementation(libs.converter.gson) {
-        exclude group: 'com.google.code.gson', module: 'gson'
-    }
-
-    // OkHttp3
-    implementation libs.okhttp
-    implementation libs.logging.interceptor
 
     // Glide
     implementation libs.glide
@@ -79,8 +72,24 @@ dependencies {
     ksp libs.compiler
 
     // Hilt
-    implementation libs.hilt.android
-    ksp libs.hilt.compiler
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
+
+    // Room
+    implementation(libs.bundles.room)
+    ksp(libs.androidx.room.compiler)
+
+    // Lifecycle
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+
+    // Retrofit & OkHttp
+    implementation(libs.bundles.retrofit)
+
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+
+    // Gson
+    implementation(libs.gson)
 
     // For instrumentation tests
     androidTestImplementation  libs.hilt.android.testing
@@ -90,7 +99,6 @@ dependencies {
     testImplementation libs.hilt.android.testing
     kspTest libs.hilt.compiler
 
-    implementation libs.androidx.lifecycle.viewmodel.ktx
     implementation libs.androidx.fragment.ktx
 
     // JUnit 5
@@ -104,11 +112,6 @@ dependencies {
     implementation libs.mockk
 
     testImplementation libs.flow.test.observer
-
-    // Room library
-    implementation libs.androidx.room.runtime
-    ksp libs.androidx.room.compiler
-    implementation libs.androidx.room.ktx
 }
 
 

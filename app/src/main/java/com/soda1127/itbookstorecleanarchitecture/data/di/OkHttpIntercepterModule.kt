@@ -8,7 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 
 @Module
 @InstallIn(SingletonComponent::class)
-class OkHttpIntercepterModule {
+object OkHttpIntercepterModule {
 
 
     @HttpLoggingInterceptorQualifier

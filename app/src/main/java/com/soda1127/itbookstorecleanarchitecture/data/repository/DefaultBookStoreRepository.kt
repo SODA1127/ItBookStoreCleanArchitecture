@@ -5,6 +5,7 @@ import com.soda1127.itbookstorecleanarchitecture.data.di.api.BooksApiService
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
@@ -13,12 +14,11 @@ import javax.inject.Singleton
 
 @Singleton
 class DefaultBookStoreRepository @Inject constructor(
-    private val ioDispatcher: CoroutineDispatcher,
     private val booksApiService: BooksApiService,
     private val bookInWishListDao: BookInWishListDao
 ): BookStoreRepository {
 
-    override suspend fun getNewBooks(): Flow<List<BookEntity>> = withContext(ioDispatcher) {
+    override suspend fun getNewBooks(): Flow<List<BookEntity>> = withContext(Dispatchers.IO) {
         flow<List<BookEntity>> {
             val booksResponse = booksApiService.getNewBooks()
             if (booksResponse.isSuccessful) {
@@ -30,7 +30,7 @@ class DefaultBookStoreRepository @Inject constructor(
         }
     }
 
-    override suspend fun getBookInfo(isbn13: String): Flow<BookInfoEntity?> = withContext(ioDispatcher) {
+    override suspend fun getBookInfo(isbn13: String): Flow<BookInfoEntity?> = withContext(Dispatchers.IO) {
         flow {
             val bookInfoResponse = booksApiService.getBookInfo(isbn13)
             if (bookInfoResponse.isSuccessful) {
@@ -41,27 +41,27 @@ class DefaultBookStoreRepository @Inject constructor(
         }
     }
 
-    override suspend fun getBooksInWishList(): Flow<List<BookEntity>> = withContext(ioDispatcher) {
+    override suspend fun getBooksInWishList(): Flow<List<BookEntity>> = withContext(Dispatchers.IO) {
         flow {
             emit(bookInWishListDao.getAll())
         }
     }
 
-    override suspend fun getBookInWishList(isbn13: String): Flow<BookEntity?> = withContext(ioDispatcher) {
+    override suspend fun getBookInWishList(isbn13: String): Flow<BookEntity?> = withContext(Dispatchers.IO) {
         flow {
             emit(bookInWishListDao.get(isbn13))
         }
     }
 
-    override suspend fun addBookInWishList(bookEntity: BookEntity) = withContext(ioDispatcher) {
+    override suspend fun addBookInWishList(bookEntity: BookEntity) = withContext(Dispatchers.IO) {
         bookInWishListDao.insert(bookEntity)
     }
 
-    override suspend fun removeBookInWishList(isbn13: String) = withContext(ioDispatcher) {
+    override suspend fun removeBookInWishList(isbn13: String) = withContext(Dispatchers.IO) {
         bookInWishListDao.delete(isbn13)
     }
 
-    override suspend fun searchBooksByKeyword(keyword: String, page: String?): Flow<Triple<List<BookEntity>, String?, Int?>> = withContext(ioDispatcher) {
+    override suspend fun searchBooksByKeyword(keyword: String, page: String?): Flow<Triple<List<BookEntity>, String?, Int?>> = withContext(Dispatchers.IO) {
         val response = when (page) {
             null -> {
                 booksApiService.searchBooksByKeyword(keyword)

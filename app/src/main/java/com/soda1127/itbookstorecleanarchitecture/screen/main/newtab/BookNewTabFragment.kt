@@ -1,4 +1,4 @@
-package com.soda1127.itbookstorecleanarchitecture.screen.main.new
+package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 
 import android.os.Bundle
 import android.view.View
@@ -42,13 +42,15 @@ class BookNewTabFragment : BaseFragment<BookNewTabViewModel, FragmentNewTabBindi
         recyclerView.adapter = adapter
     }
 
-    override fun observeData() = lifecycleScope.launchWhenStarted {
-        vm.newTabStateFlow.collect { state ->
-            when (state) {
-                is NewTabState.Loading -> handleLoading()
-                is NewTabState.Success -> handleSuccess(state)
-                is NewTabState.Error -> handleError(state)
-                else -> Unit
+    override fun observeData() {
+        lifecycleScope.launchWhenStarted {
+            vm.newTabStateFlow.collect { state ->
+                when (state) {
+                    is NewTabState.Loading -> handleLoading()
+                    is NewTabState.Success -> handleSuccess(state)
+                    is NewTabState.Error -> handleError(state)
+                    else -> Unit
+                }
             }
         }
     }

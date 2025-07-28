@@ -56,12 +56,14 @@ class BookmarkTabFragment: BaseFragment<BookmarkTabViewModel, FragmentBookmarkTa
         }
     }
 
-    override fun observeData() = lifecycleScope.launchWhenStarted {
-        vm.bookmarkStateFlow.collect { state ->
-            when (state) {
-                is BookmarkState.Loading -> handleLoading()
-                is BookmarkState.Success -> handleSuccess(state)
-                else -> Unit
+    override fun observeData() {
+        lifecycleScope.launchWhenStarted {
+            vm.bookmarkStateFlow.collect { state ->
+                when (state) {
+                    is BookmarkState.Loading -> handleLoading()
+                    is BookmarkState.Success -> handleSuccess(state)
+                    else -> Unit
+                }
             }
         }
     }

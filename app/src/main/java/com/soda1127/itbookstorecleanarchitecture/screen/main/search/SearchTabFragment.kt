@@ -84,14 +84,16 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
         }
     }
 
-    override fun observeData() = lifecycleScope.launchWhenStarted {
-        vm.searchTabStateFlow.collect { state ->
-            when (state) {
-                is SearchTabState.Loading -> handleLoading()
-                is SearchTabState.Success.SearchResult -> handleSearchResult(state)
-                is SearchTabState.Success.SearchHistory -> handleSearchHistory(state)
-                is SearchTabState.Error -> handleError(state)
-                else -> Unit
+    override fun observeData() {
+        lifecycleScope.launchWhenStarted {
+            vm.searchTabStateFlow.collect { state ->
+                when (state) {
+                    is SearchTabState.Loading -> handleLoading()
+                    is SearchTabState.Success.SearchResult -> handleSearchResult(state)
+                    is SearchTabState.Success.SearchHistory -> handleSearchHistory(state)
+                    is SearchTabState.Error -> handleError(state)
+                    else -> Unit
+                }
             }
         }
     }

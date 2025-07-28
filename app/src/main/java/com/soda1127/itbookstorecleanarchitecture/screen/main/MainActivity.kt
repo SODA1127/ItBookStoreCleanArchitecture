@@ -13,7 +13,7 @@ import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseActivity
 import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen
 import com.soda1127.itbookstorecleanarchitecture.screen.main.bookmark.BookmarkTabFragment
 import com.soda1127.itbookstorecleanarchitecture.screen.main.search.SearchTabFragment
-import com.soda1127.itbookstorecleanarchitecture.screen.main.new.BookNewTabFragment
+import com.soda1127.itbookstorecleanarchitecture.screen.main.newtab.BookNewTabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 

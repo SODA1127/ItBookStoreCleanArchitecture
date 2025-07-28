@@ -14,7 +14,7 @@ abstract class BaseFragment<VM: BaseViewModel, VB: ViewBinding>: Fragment() {
 
     abstract val binding: VB
 
-    private lateinit var fetchJob: Job
+    private var fetchJob: Job? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = binding.root
 
@@ -31,12 +31,12 @@ abstract class BaseFragment<VM: BaseViewModel, VB: ViewBinding>: Fragment() {
 
     abstract fun initViews()
 
-    abstract fun observeData(): Job
+    abstract fun observeData()
 
     override fun onDestroyView() {
         super.onDestroyView()
-        if (fetchJob.isActive) {
-            fetchJob.cancel()
+        if (fetchJob?.isActive == true) {
+            fetchJob?.cancel()
         }
     }
 
