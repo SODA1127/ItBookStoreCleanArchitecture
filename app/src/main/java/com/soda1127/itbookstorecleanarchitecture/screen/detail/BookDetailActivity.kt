@@ -7,7 +7,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.soda1127.itbookstorecleanarchitecture.extensions.load
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
@@ -16,6 +18,7 @@ import com.soda1127.itbookstorecleanarchitecture.extensions.viewBinding
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class BookDetailActivity : BaseActivity<BookDetailViewModel, ActivityBookDetailBinding>() {
@@ -27,27 +30,34 @@ class BookDetailActivity : BaseActivity<BookDetailViewModel, ActivityBookDetailB
     private val onBackPressedCallback: OnBackPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             vm.saveMemo(binding.bookMemoInput.text.toString())
+            finish()
         }
     }
 
     override fun initViews() = with(binding) {
         onBackPressedDispatcher.addCallback(this@BookDetailActivity, onBackPressedCallback)
 
-        toolbar.setNavigationOnClickListener {  }
+        toolbar.setNavigationOnClickListener {
+            onBackPressedCallback.handleOnBackPressed()
+        }
         titleTextView.text = intent.getStringExtra(KEY_TITLE)
 
         likedButton.visibility = View.GONE
 
     }
 
-    override fun observeData(): Job = lifecycleScope.launchWhenStarted {
-        vm.bookDetailStateFlow.collect { state ->
-            when (state) {
-                is BookDetailState.Loading -> handleLoading()
-                is BookDetailState.Success -> handleSuccess(state)
-                is BookDetailState.Error -> handleError(state)
-                is BookDetailState.SaveMemo -> onBackPressedCallback.handleOnBackPressed()
-                else -> Unit
+    override fun observeData() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                vm.bookDetailStateFlow.collect { state ->
+                    when (state) {
+                        is BookDetailState.Loading -> handleLoading()
+                        is BookDetailState.Success -> handleSuccess(state)
+                        is BookDetailState.Error -> handleError(state)
+                        is BookDetailState.SaveMemo -> onBackPressedCallback.handleOnBackPressed()
+                        else -> Unit
+                    }
+                }
             }
         }
     }
@@ -84,7 +94,10 @@ class BookDetailActivity : BaseActivity<BookDetailViewModel, ActivityBookDetailB
 
         var infoText = ""
         BookInfoEntity::class.members.forEach { property ->
-            infoText += "[${property.name}] : ${property.parameters}\n\n"
+            if (property is kotlin.reflect.KProperty<*>) {
+                val value = property.call(bookInfoEntity) // call() 함수 사용
+                infoText += "[${property.name}] : ${value}\n\n"
+            }
         }
 
 

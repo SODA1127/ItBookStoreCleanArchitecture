@@ -26,7 +26,7 @@ abstract class BaseActivity<VM: BaseViewModel, VB: ViewBinding>: AppCompatActivi
 
     abstract fun initViews()
 
-    abstract fun observeData(): Job
+    abstract fun observeData()
 
     override fun onDestroy() {
         if (fetchJob.isActive) {

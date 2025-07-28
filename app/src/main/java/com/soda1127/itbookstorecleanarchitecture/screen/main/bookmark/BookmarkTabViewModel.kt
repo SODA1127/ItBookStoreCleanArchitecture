@@ -22,9 +22,6 @@ class BookmarkTabViewModel @Inject constructor(
 
     override fun fetchData(): Job = viewModelScope.launch {
         setState(
-            BookmarkState.Success(listOf())
-        )
-        setState(
             BookmarkState.Loading
         )
         bookStoreRepository.getBooksInWishList().collect { bookList ->

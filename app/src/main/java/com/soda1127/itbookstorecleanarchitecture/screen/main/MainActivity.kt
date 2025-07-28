@@ -33,10 +33,12 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>(), BottomN
         bottomNav.setOnNavigationItemSelectedListener(this@MainActivity)
     }
 
-    override fun observeData() = lifecycleScope.launch {
-        vm.navigationItemStateFlow.collect { navigation ->
-            navigation ?: return@collect
-            binding.bottomNav.selectedItemId = navigation.navigationMenuId
+    override fun observeData() {
+        lifecycleScope.launch {
+            vm.navigationItemStateFlow.collect { navigation ->
+                navigation ?: return@collect
+                binding.bottomNav.selectedItemId = navigation.navigationMenuId
+            }
         }
     }
 

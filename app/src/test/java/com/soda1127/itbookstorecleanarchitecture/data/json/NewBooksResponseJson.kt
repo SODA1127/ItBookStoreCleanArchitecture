@@ -1,4 +1,4 @@
-package com.soda1127.example.bookstore.data.json
+package com.soda1127.itbookstorecleanarchitecture.data.json
 
 const val NewBooksResponseJson =
 """
