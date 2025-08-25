@@ -8,12 +8,12 @@
 
     <item
         android:id="@+id/menu_bookmark"
-        android:icon="@drawable/ic_home"
+        android:icon="@drawable/ic_tab_bookmark"
         android:title="@string/bookmark_tab" />
 
     <item
         android:id="@+id/menu_history"
-        android:icon="@drawable/ic_home"
-        android:title="@string/history_tab" />
+        android:icon="@drawable/ic_tab_search"
+        android:title="@string/search_tab" />
 
 </menu>
