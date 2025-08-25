@@ -22,10 +22,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.soda1127.itbookstorecleanarchitecture" />
+                  <option name="mobileSdkAppId" value="1:610354399524:android:9ba92fb15a51e4b4e1cbb1" />
+                  <option name="projectId" value="itbookstorecleanarchitecture" />
+                  <option name="projectNumber" value="610354399524" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />
