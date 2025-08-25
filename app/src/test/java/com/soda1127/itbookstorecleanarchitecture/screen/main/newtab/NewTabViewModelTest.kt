@@ -3,7 +3,6 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 import com.google.gson.Gson
 import com.soda1127.itbookstorecleanarchitecture.data.json.NewBooksResponseJson
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
-import com.soda1127.itbookstorecleanarchitecture.data.repository.TestBookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.data.response.BookStoreNewResponse
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.testbase.JUnit5Test
@@ -20,7 +19,13 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.util.stream.Stream
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
@@ -37,7 +42,7 @@ internal class NewTabViewModelTest: JUnit5Test() {
         sut = BookNewTabViewModel(bookStoreRepository)
     }
 
-    private fun mockGetNewBooks() {
+    private fun mockGetNewBooksSucceed() {
         coEvery { bookStoreRepository.getNewBooks() } returns flow {
             delay(100)
             emit(
@@ -49,9 +54,18 @@ internal class NewTabViewModelTest: JUnit5Test() {
         }
     }
 
+    private fun mockGetNewBooksFailed(): Exception {
+        coEvery { bookStoreRepository.getNewBooks() } coAnswers {
+            delay(100)
+            throw exception
+        }
+        return exception
+    }
+
     @Test
-    fun `Test fetch Book List`() = runTest(UnconfinedTestDispatcher()) {
-        mockGetNewBooks()
+    fun `fetch Book List succeed`() = runTest(UnconfinedTestDispatcher()) {
+        // Given
+        mockGetNewBooksSucceed()
 
         val expectedStateList = listOf(
             NewTabState.Uninitialized,
@@ -71,12 +85,99 @@ internal class NewTabViewModelTest: JUnit5Test() {
             )
         )
 
+        // Then
         sut.newTabStateFlow.test(TestScope()) {
             assertValues(
                 expectedStateList
             )
         }
+
+        // When
         sut.fetchData()
     }
-    
+
+    @Test
+    fun `fetch Book List failed`() = runTest(UnconfinedTestDispatcher()) {
+        // Given
+        val exception = mockGetNewBooksFailed()
+
+        val expectedStateList = listOf(
+            NewTabState.Uninitialized,
+            NewTabState.Loading,
+            NewTabState.Error(exception)
+        )
+
+        // Then
+        sut.newTabStateFlow.test(TestScope()) {
+            assertValues(
+                expectedStateList
+            )
+        }
+
+        // When
+        sut.fetchData()
+    }
+
+    @ParameterizedTest
+    @MethodSource("parameterizedTestData")
+    fun `fetch Book List`(testType: TestType, expectedStateList: List<NewTabState>) = runTest(UnconfinedTestDispatcher()) {
+        triageTestCaseBy(testType)
+
+        sut.newTabStateFlow.test(TestScope()) {
+            assertValues(
+                expectedStateList
+            )
+        }
+
+        sut.fetchData()
+    }
+
+    private fun triageTestCaseBy(testType: TestType) {
+        when (testType) {
+            TestType.SUCCEED -> mockGetNewBooksSucceed()
+            TestType.FAILED -> mockGetNewBooksFailed()
+        }
+    }
+
+    enum class TestType {
+        SUCCEED,
+        FAILED
+    }
+
+    companion object {
+
+        val exception = Exception("Network Error")
+
+        @JvmStatic
+        fun parameterizedTestData(): Stream<Arguments?>? {
+            val suceedCase = listOf(
+                NewTabState.Uninitialized,
+                NewTabState.Loading,
+                NewTabState.Success(
+                    Gson().fromJson(NewBooksResponseJson, BookStoreNewResponse::class.java).books.map { book ->
+                        BookModel(
+                            id = book.isbn13,
+                            title = book.title,
+                            subtitle = book.subtitle,
+                            isbn13 = book.isbn13,
+                            price = book.price,
+                            image = book.image,
+                            url = book.url
+                        )
+                    }
+                )
+            )
+            val failedCase = listOf(
+                NewTabState.Uninitialized,
+                NewTabState.Loading,
+                NewTabState.Error(e = exception)
+            )
+            return Stream.of(
+                Arguments.of(TestType.SUCCEED, suceedCase),
+                Arguments.of(TestType.FAILED, failedCase),
+            )
+        }
+
+    }
+
 }

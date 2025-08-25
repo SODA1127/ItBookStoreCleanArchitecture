@@ -4,6 +4,7 @@ import com.soda1127.itbookstorecleanarchitecture.data.entity.SearchHistoryEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
 class TestBookSearchRepository: BookSearchRepository {
@@ -17,7 +18,10 @@ class TestBookSearchRepository: BookSearchRepository {
     }
 
     override suspend fun getAllSearchHistories(): Flow<List<SearchHistoryEntity>> {
-        TODO("Not yet implemented")
+        delay(100)
+        return flow {
+            emit(searchHistoryList)
+        }
     }
 
     override suspend fun getSearchHistory(keyword: String): Flow<SearchHistoryEntity?> {
