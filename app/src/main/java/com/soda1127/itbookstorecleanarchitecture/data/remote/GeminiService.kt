@@ -60,4 +60,19 @@ class GeminiService @Inject constructor() {
             "이 책에 대한 요약을 생성할 수 없습니다."
         }
     }
+
+    suspend fun checkUserWantToFindTheITBooks(userMessage: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val prompt = """
+                사용자의 메세지 ${userMessage}를 분석해주세요.
+                이 메세지의 의도가 IT 도서 추천을 받는 것이라면 'true'를,
+                다른 도서 추천, 또는 다른 주제라면 'false'를 한단어로 반환해주세요
+            """.trimIndent()
+            val response = generativeModel.generateContent(prompt)
+            return@withContext response.text?.trim().toBoolean()
+        } catch (e: Exception) {
+            return@withContext false
+        }
+    }
+
 }

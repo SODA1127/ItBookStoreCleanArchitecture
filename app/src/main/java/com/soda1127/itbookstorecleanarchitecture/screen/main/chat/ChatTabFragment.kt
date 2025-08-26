@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
@@ -43,7 +42,12 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.graphics.Color
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,9 +56,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -92,7 +94,64 @@ class ChatTabFragment : Fragment(), ScrollableScreen {
         return ComposeView(requireContext()).apply {
             composeView = this
             setContent {
-                MaterialTheme {
+                val isDarkTheme = isSystemInDarkTheme()
+                MaterialTheme(
+                    colorScheme = if (isDarkTheme) {
+                        darkColorScheme(
+                            primary = Color(0xFFD0BCFF),
+                            onPrimary = Color(0xFF381E72),
+                            primaryContainer = Color(0xFF4F378B),
+                            onPrimaryContainer = Color(0xFFEADDFF),
+                            secondary = Color(0xFFCCC2DC),
+                            onSecondary = Color(0xFF332D41),
+                            secondaryContainer = Color(0xFF4A4458),
+                            onSecondaryContainer = Color(0xFFE8DEF8),
+                            tertiary = Color(0xFFEFB8C8),
+                            onTertiary = Color(0xFF492532),
+                            tertiaryContainer = Color(0xFF633B48),
+                            onTertiaryContainer = Color(0xFFFFD8E4),
+                            error = Color(0xFFFFB4AB),
+                            onError = Color(0xFF690005),
+                            errorContainer = Color(0xFF93000A),
+                            onErrorContainer = Color(0xFFFFDAD6),
+                            background = Color(0xFF1C1B1F),
+                            onBackground = Color(0xFFE6E1E5),
+                            surface = Color(0xFF1C1B1F),
+                            onSurface = Color(0xFFE6E1E5),
+                            surfaceVariant = Color(0xFF49454F),
+                            onSurfaceVariant = Color(0xFFCAC4D0),
+                            outline = Color(0xFF938F99),
+                            outlineVariant = Color(0xFF49454F)
+                        )
+                    } else {
+                        lightColorScheme(
+                            primary = Color(0xFF6750A4),
+                            onPrimary = Color(0xFFFFFFFF),
+                            primaryContainer = Color(0xFFEADDFF),
+                            onPrimaryContainer = Color(0xFF21005D),
+                            secondary = Color(0xFF625B71),
+                            onSecondary = Color(0xFFFFFFFF),
+                            secondaryContainer = Color(0xFFE8DEF8),
+                            onSecondaryContainer = Color(0xFF1D192B),
+                            tertiary = Color(0xFF7D5260),
+                            onTertiary = Color(0xFFFFFFFF),
+                            tertiaryContainer = Color(0xFFFFD8E4),
+                            onTertiaryContainer = Color(0xFF31111D),
+                            error = Color(0xFFBA1A1A),
+                            onError = Color(0xFFFFFFFF),
+                            errorContainer = Color(0xFFFFDAD6),
+                            onErrorContainer = Color(0xFF410002),
+                            background = Color(0xFFFFFBFE),
+                            onBackground = Color(0xFF1C1B1F),
+                            surface = Color(0xFFFFFBFE),
+                            onSurface = Color(0xFF1C1B1F),
+                            surfaceVariant = Color(0xFFE7E0EC),
+                            onSurfaceVariant = Color(0xFF49454F),
+                            outline = Color(0xFF79747E),
+                            outlineVariant = Color(0xFFCAC4D0)
+                        )
+                    }
+                ) {
                     ChatScreen(viewModel)
                 }
             }
@@ -114,10 +173,9 @@ class ChatTabFragment : Fragment(), ScrollableScreen {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatScreen(viewModel: ChatViewModel) {
-    val chatState by viewModel.chatState.collectAsState()
+    val chatState by viewModel.chatStateFlow.collectAsState()
     val listState = rememberLazyListState()
     var messageText by remember { mutableStateOf("") }
-    var keyboardVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(chatState.messages.size) {
         if (chatState.messages.isNotEmpty()) {
@@ -127,17 +185,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
 
     val topBarBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    val density = LocalDensity.current
-    
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .onSizeChanged { size ->
-                // 키보드가 올라왔는지 감지 (화면 높이가 줄어들면 키보드가 올라온 것)
-                val screenHeight = with(density) { size.height.toDp() }
-                keyboardVisible = screenHeight < 600.dp // 임계값 설정
-            }
-    ) {
+    Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.fillMaxSize(),
             topBar = {
@@ -154,7 +202,10 @@ fun ChatScreen(viewModel: ChatViewModel) {
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        titleContentColor = MaterialTheme.colorScheme.onSurface,
+                        actionIconContentColor = MaterialTheme.colorScheme.onSurface,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onSurface
                     ),
                     scrollBehavior = topBarBehavior
                 )
@@ -194,7 +245,7 @@ fun ChatScreen(viewModel: ChatViewModel) {
 @Composable
 fun ChatMessage(message: ChatMessage) {
     val isUser = message.isFromUser
-    
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
@@ -210,9 +261,9 @@ fun ChatMessage(message: ChatMessage) {
                 bottomEnd = if (isUser) 4.dp else 16.dp
             ),
             colors = CardDefaults.cardColors(
-                containerColor = if (isUser) 
-                    MaterialTheme.colorScheme.primary 
-                else 
+                containerColor = if (isUser)
+                    MaterialTheme.colorScheme.primary
+                else
                     MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
@@ -221,13 +272,13 @@ fun ChatMessage(message: ChatMessage) {
             ) {
                 MarkdownText(
                     markdown = message.content,
-                    color = if (isUser) 
-                        MaterialTheme.colorScheme.onPrimary 
-                    else 
-                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (isUser)
+                        MaterialTheme.colorScheme.onPrimary
+                    else
+                        MaterialTheme.colorScheme.onSurface,
                     fontSize = 14.sp
                 )
-                
+
                 // 책 목록이 있는 경우 표시
                 message.books?.let { books ->
                     if (books.isNotEmpty()) {
@@ -280,9 +331,18 @@ fun ChatInput(
                         }
                     }
                 ),
-                maxLines = 4
+                maxLines = 4,
+                colors = androidx.compose.material3.OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unfocusedPlaceholderColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
-            
+
             Button(
                 onClick = {
                     if (value.isNotBlank()) {
@@ -312,7 +372,7 @@ fun ChatInput(
 @Composable
 fun BookRecommendationItem(book: BookEntity) {
     val context = LocalContext.current
-    
+
     Card(
         modifier = Modifier
             .width(120.dp)
@@ -342,9 +402,9 @@ fun BookRecommendationItem(book: BookEntity) {
                     .height(80.dp),
                 contentScale = ContentScale.Crop
             )
-            
+
             Spacer(modifier = Modifier.height(4.dp))
-            
+
             // 책 제목
             Text(
                 text = book.title,
@@ -353,9 +413,9 @@ fun BookRecommendationItem(book: BookEntity) {
                 maxLines = 2,
                 overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
             )
-            
+
             Spacer(modifier = Modifier.height(2.dp))
-            
+
             // 가격
             Text(
                 text = book.price,
@@ -366,3 +426,348 @@ fun BookRecommendationItem(book: BookEntity) {
     }
 }
 
+/**
+ * ********** Previews Start **********
+ */
+
+@Preview(
+    name = "Chat Screen - Light Theme",
+    showBackground = true,
+    backgroundColor = 0xFFFFFBFE
+)
+@Composable
+fun ChatScreenLightPreview() {
+    MaterialTheme(
+        colorScheme = lightColorScheme(
+            primary = Color(0xFF6750A4),
+            onPrimary = Color(0xFFFFFFFF),
+            primaryContainer = Color(0xFFEADDFF),
+            onPrimaryContainer = Color(0xFF21005D),
+            secondary = Color(0xFF625B71),
+            onSecondary = Color(0xFFFFFFFF),
+            secondaryContainer = Color(0xFFE8DEF8),
+            onSecondaryContainer = Color(0xFF1D192B),
+            tertiary = Color(0xFF7D5260),
+            onTertiary = Color(0xFFFFFFFF),
+            tertiaryContainer = Color(0xFFFFD8E4),
+            onTertiaryContainer = Color(0xFF31111D),
+            error = Color(0xFFBA1A1A),
+            onError = Color(0xFFFFFFFF),
+            errorContainer = Color(0xFFFFDAD6),
+            onErrorContainer = Color(0xFF410002),
+            background = Color(0xFFFFFBFE),
+            onBackground = Color(0xFF1C1B1F),
+            surface = Color(0xFFFFFBFE),
+            onSurface = Color(0xFF1C1B1F),
+            surfaceVariant = Color(0xFFE7E0EC),
+            onSurfaceVariant = Color(0xFF49454F),
+            outline = Color(0xFF79747E),
+            outlineVariant = Color(0xFFCAC4D0)
+        )
+    ) {
+        // 간단한 채팅 UI 미리보기
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // TopAppBar
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 4.dp
+            ) {
+                Text(
+                    text = "Gemini AI 채팅",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // 채팅 메시지들
+            ChatMessage(
+                ChatMessage(
+                    id = "preview1",
+                    content = "안녕하세요! IT 도서 추천을 도와드릴게요.",
+                    isFromUser = false,
+                    timestamp = System.currentTimeMillis(),
+                    books = null
+                )
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            ChatMessage(
+                ChatMessage(
+                    id = "preview2",
+                    content = "안드로이드 개발 관련 책을 추천해주세요",
+                    isFromUser = true,
+                    timestamp = System.currentTimeMillis(),
+                    books = null
+                )
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            ChatMessage(
+                ChatMessage(
+                    id = "preview3",
+                    content = "🔍 **'android' 관련 추천 도서**\n\n📚 **Learn Android Studio 3 with Kotlin**\n이 책은 Android 개발을 처음 시작하는 개발자들에게 적합합니다.",
+                    isFromUser = false,
+                    timestamp = System.currentTimeMillis(),
+                    books = listOf(
+                        BookEntity(
+                            title = "Learn Android Studio 3 with Kotlin",
+                            subtitle = "Android Development Guide",
+                            isbn13 = "9781234567890",
+                            price = "₩35,000",
+                            image = "https://example.com/book1.jpg",
+                            url = "https://example.com/book1"
+                        )
+                    )
+                )
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // 입력 필드
+            ChatInput(
+                value = "안드로이드 개발",
+                onValueChange = {},
+                onSendMessage = {},
+                isLoading = false
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Chat Screen - Dark Theme",
+    showBackground = true,
+    backgroundColor = 0xFF1C1B1F
+)
+@Composable
+fun ChatScreenDarkPreview() {
+    MaterialTheme(
+        colorScheme = darkColorScheme(
+            primary = Color(0xFFD0BCFF),
+            onPrimary = Color(0xFF381E72),
+            primaryContainer = Color(0xFF4F378B),
+            onPrimaryContainer = Color(0xFFEADDFF),
+            secondary = Color(0xFFCCC2DC),
+            onSecondary = Color(0xFF332D41),
+            secondaryContainer = Color(0xFF4A4458),
+            onSecondaryContainer = Color(0xFFE8DEF8),
+            tertiary = Color(0xFFEFB8C8),
+            onTertiary = Color(0xFF492532),
+            tertiaryContainer = Color(0xFF633B48),
+            onTertiaryContainer = Color(0xFFFFD8E4),
+            error = Color(0xFFFFB4AB),
+            onError = Color(0xFF690005),
+            errorContainer = Color(0xFF93000A),
+            onErrorContainer = Color(0xFFFFDAD6),
+            background = Color(0xFF1C1B1F),
+            onBackground = Color(0xFFE6E1E5),
+            surface = Color(0xFF1C1B1F),
+            onSurface = Color(0xFFE6E1E5),
+            surfaceVariant = Color(0xFF49454F),
+            onSurfaceVariant = Color(0xFFCAC4D0),
+            outline = Color(0xFF938F99),
+            outlineVariant = Color(0xFF49454F)
+        )
+    ) {
+        // 간단한 채팅 UI 미리보기
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            // TopAppBar
+            Surface(
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 4.dp
+            ) {
+                Text(
+                    text = "Gemini AI 채팅",
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(16.dp),
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // 채팅 메시지들
+            ChatMessage(
+                ChatMessage(
+                    id = "preview1",
+                    content = "안녕하세요! IT 도서 추천을 도와드릴게요.",
+                    isFromUser = false,
+                    timestamp = System.currentTimeMillis(),
+                    books = null
+                )
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            ChatMessage(
+                ChatMessage(
+                    id = "preview2",
+                    content = "안드로이드 개발 관련 책을 추천해주세요",
+                    isFromUser = true,
+                    timestamp = System.currentTimeMillis(),
+                    books = null
+                )
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            ChatMessage(
+                ChatMessage(
+                    id = "preview3",
+                    content = "🔍 **'android' 관련 추천 도서**\n\n📚 **Learn Android Studio 3 with Kotlin**\n이 책은 Android 개발을 처음 시작하는 개발자들에게 적합합니다.",
+                    isFromUser = false,
+                    timestamp = System.currentTimeMillis(),
+                    books = listOf(
+                        BookEntity(
+                            title = "Learn Android Studio 3 with Kotlin",
+                            subtitle = "Android Development Guide",
+                            isbn13 = "9781234567890",
+                            price = "₩35,000",
+                            image = "https://itbook.store/img/books/9781617293290.png",
+                            url = "https://example.com/book1"
+                        )
+                    )
+                )
+            )
+            
+            Spacer(modifier = Modifier.weight(1f))
+            
+            // 입력 필드
+            ChatInput(
+                value = "안드로이드 개발",
+                onValueChange = {},
+                onSendMessage = {},
+                isLoading = false
+            )
+        }
+    }
+}
+
+@Preview(
+    name = "Chat Message - User",
+    showBackground = true
+)
+@Composable
+fun ChatMessageUserPreview() {
+    MaterialTheme {
+        ChatMessage(
+            ChatMessage(
+                id = "preview1",
+                content = "안드로이드 개발 관련 책을 추천해주세요",
+                isFromUser = true,
+                timestamp = System.currentTimeMillis(),
+                books = null
+            )
+        )
+    }
+}
+
+@Preview(
+    name = "Chat Message - Bot",
+    showBackground = true
+)
+@Composable
+fun ChatMessageBotPreview() {
+    MaterialTheme {
+        ChatMessage(
+            ChatMessage(
+                id = "preview2",
+                content = "안녕하세요! IT 도서 추천을 도와드릴게요. 어떤 분야의 책을 찾고 계신가요?",
+                isFromUser = false,
+                timestamp = System.currentTimeMillis(),
+                books = null
+            )
+        )
+    }
+}
+
+@Preview(
+    name = "Chat Message - Bot with Books",
+    showBackground = true
+)
+@Composable
+fun ChatMessageBotWithBooksPreview() {
+    MaterialTheme {
+        ChatMessage(
+            ChatMessage(
+                id = "preview3",
+                content = "🔍 **'android' 관련 추천 도서**\n\n📚 **Learn Android Studio 3 with Kotlin**\n이 책은 Android 개발을 처음 시작하는 개발자들에게 적합합니다.",
+                isFromUser = false,
+                timestamp = System.currentTimeMillis(),
+                books = listOf(
+                    BookEntity(
+                        title = "Learn Android Studio 3 with Kotlin",
+                        subtitle = "Android Development Guide",
+                        isbn13 = "9781234567890",
+                        price = "₩35,000",
+                        image = "https://example.com/book1.jpg",
+                        url = "https://example.com/book1"
+                    ),
+                    BookEntity(
+                        title = "Android Programming: The Big Nerd Ranch Guide",
+                        subtitle = "Complete Android Development",
+                        isbn13 = "9780987654321",
+                        price = "₩42,000",
+                        image = "https://example.com/book2.jpg",
+                        url = "https://example.com/book2"
+                    )
+                )
+            )
+        )
+    }
+}
+
+@Preview(
+    name = "Chat Input",
+    showBackground = true
+)
+@Composable
+fun ChatInputPreview() {
+    MaterialTheme {
+        ChatInput(
+            value = "안드로이드 개발",
+            onValueChange = {},
+            onSendMessage = {},
+            isLoading = false
+        )
+    }
+}
+
+@Preview(
+    name = "Book Recommendation Item",
+    showBackground = true
+)
+@Composable
+fun BookRecommendationItemPreview() {
+    MaterialTheme {
+        BookRecommendationItem(
+            BookEntity(
+                title = "Learn Android Studio 3 with Kotlin",
+                subtitle = "Android Development Guide",
+                isbn13 = "9781234567890",
+                price = "₩35,000",
+                image = "https://itbook.store/img/books/9781617293290.png",
+                url = "https://example.com/book1"
+            )
+        )
+    }
+}
+
+/**
+ * ********** Previews End **********
+ */

@@ -1,7 +1,7 @@
 <resources>
 
     <style name="Widget.BookStoreCleanArchitecture.Toolbar" parent="Widget.MaterialComponents.Toolbar.Primary">
-        <item name="android:background">@color/white</item>
+        <item name="android:background">?attr/colorSurface</item>
         <item name="android:title">@null</item>
     </style>
 

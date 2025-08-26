@@ -14,13 +14,13 @@ import java.util.*
 import javax.inject.Inject
 
 @HiltViewModel
-class ChatViewModel @Inject constructor(
+open class ChatViewModel @Inject constructor(
     private val geminiService: GeminiService,
     private val bookStoreRepository: BookStoreRepository
 ) : BaseViewModel() {
 
-    private val _chatState = MutableStateFlow(ChatState())
-    val chatState: StateFlow<ChatState> = _chatState.asStateFlow()
+    private val _chatStateFlow = MutableStateFlow(ChatState())
+    open val chatStateFlow: StateFlow<ChatState> = _chatStateFlow.asStateFlow()
 
     fun sendMessage(content: String) {
         if (content.isBlank()) return
@@ -34,14 +34,14 @@ class ChatViewModel @Inject constructor(
         )
 
         viewModelScope.launch {
-            _chatState.value = _chatState.value.copy(
-                messages = _chatState.value.messages + userMessage,
+            _chatStateFlow.value = _chatStateFlow.value.copy(
+                messages = _chatStateFlow.value.messages + userMessage,
                 isLoading = true
             )
 
             try {
                 // 책 추천 요청인지 확인
-                val isBookRecommendationRequest = isBookRecommendationRequest(content)
+                val isBookRecommendationRequest = geminiService.checkUserWantToFindTheITBooks(content)
                 
                 if (isBookRecommendationRequest) {
                     // 책 추천 요청인 경우
@@ -56,8 +56,8 @@ class ChatViewModel @Inject constructor(
                         books = books
                     )
 
-                    _chatState.value = _chatState.value.copy(
-                        messages = _chatState.value.messages + botMessage,
+                    _chatStateFlow.value = _chatStateFlow.value.copy(
+                        messages = _chatStateFlow.value.messages + botMessage,
                         isLoading = false
                     )
                 } else {
@@ -71,8 +71,8 @@ class ChatViewModel @Inject constructor(
                         timestamp = System.currentTimeMillis()
                     )
 
-                    _chatState.value = _chatState.value.copy(
-                        messages = _chatState.value.messages + botMessage,
+                    _chatStateFlow.value = _chatStateFlow.value.copy(
+                        messages = _chatStateFlow.value.messages + botMessage,
                         isLoading = false
                     )
                 }
@@ -85,8 +85,8 @@ class ChatViewModel @Inject constructor(
                     timestamp = System.currentTimeMillis()
                 )
 
-                _chatState.value = _chatState.value.copy(
-                    messages = _chatState.value.messages + errorMessage,
+                _chatStateFlow.value = _chatStateFlow.value.copy(
+                    messages = _chatStateFlow.value.messages + errorMessage,
                     isLoading = false
                 )
             }
@@ -94,24 +94,9 @@ class ChatViewModel @Inject constructor(
     }
 
     fun clearChat() {
-        _chatState.value = ChatState()
+        _chatStateFlow.value = ChatState()
         geminiService.clearHistory()
     }
-
-    private fun isBookRecommendationRequest(content: String): Boolean {
-        val bookRecommendationKeywords = listOf(
-            "책 추천", "추천해", "추천해줘", "추천해주세요", "추천받고 싶어", "추천받고싶어",
-            "책을 추천", "책을 추천해", "책을 추천해줘", "책을 추천해주세요",
-            "추천 책", "추천도서", "추천 서적", "추천 문헌",
-            "개발 책", "프로그래밍 책", "코딩 책", "IT 책",
-            "학습", "공부", "배우고 싶어", "배우고싶어"
-        )
-        
-        return bookRecommendationKeywords.any { keyword ->
-            content.contains(keyword, ignoreCase = true)
-        }
-    }
-
 
 
     private suspend fun getBookRecommendation(keyword: String): Pair<String, List<BookEntity>> {

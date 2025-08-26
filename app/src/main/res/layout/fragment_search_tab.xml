@@ -16,7 +16,10 @@
         android:hint="@string/search_by_keyword"
         android:maxLines="10"
         android:inputType="text"
-        android:imeOptions="actionSearch"/>
+        android:imeOptions="actionSearch"
+        android:textColor="?attr/colorOnSurface"
+        android:textColorHint="?attr/colorOnSurfaceVariant"
+        android:backgroundTint="?attr/colorSurface"/>
 
     <Button
         android:id="@+id/searchButton"
@@ -27,16 +30,16 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:paddingHorizontal="8dp"
         android:drawableLeft="@drawable/ic_search_with_ai_btn"
-        android:drawableTint="@color/white"/>
+        android:drawableTint="?attr/colorOnPrimary"/>
 
     <ProgressBar
         android:id="@+id/aiGenerationProgressBar"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:backgroundTint="@color/white"
+        android:backgroundTint="?attr/colorSurface"
         tools:visibility="visible"
         android:visibility="gone"
-        android:indeterminateTint="@color/white"
+        android:indeterminateTint="?attr/colorPrimary"
         app:layout_constraintStart_toStartOf="@id/searchButton"
         app:layout_constraintTop_toTopOf="@id/searchButton"
         app:layout_constraintBottom_toBottomOf="@id/searchButton"/>
@@ -57,7 +60,8 @@
         app:layout_constraintTop_toBottomOf="@id/searchBarrier"
         app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible"
+        android:indeterminateTint="?attr/colorPrimary"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/searchResultRecyclerView"
@@ -89,7 +93,8 @@
         app:layout_constraintBottom_toBottomOf="parent"
         android:textSize="16sp"
         android:visibility="gone"
-        tools:visibility="visible"/>
+        tools:visibility="visible"
+        android:textColor="?attr/colorOnSurfaceVariant"/>
 
     <androidx.constraintlayout.widget.Group
         android:id="@+id/errorContainerGroup"
@@ -111,7 +116,8 @@
         android:visibility="gone"
         tools:visibility="visible"
         android:text="@string/error_occurred"
-        app:layout_constraintVertical_chainStyle="packed"/>
+        app:layout_constraintVertical_chainStyle="packed"
+        android:textColor="?attr/colorOnSurface"/>
 
     <Button
         android:id="@+id/retryButton"

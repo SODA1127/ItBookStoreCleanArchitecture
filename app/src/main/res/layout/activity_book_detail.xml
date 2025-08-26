@@ -20,7 +20,7 @@
             android:layout_gravity="center"
             tools:text="책 제목"
             android:maxWidth="180dp"
-            android:textColor="@color/black"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
             android:textStyle="bold"
             android:ellipsize="end"
@@ -74,7 +74,7 @@
                     tools:text="memo"
                     android:hint="@string/write_hint"
                     android:textSize="16sp"
-                    android:textColor="@color/black"/>
+                    android:textColor="?attr/colorOnSurface"/>
 
                 <FrameLayout
                     android:layout_width="match_parent"
@@ -87,7 +87,7 @@
                         android:layout_margin="16dp"
                         tools:text="Book Summary"
                         android:textSize="16sp"
-                        android:textColor="@color/black"/>
+                        android:textColor="?attr/colorOnSurface"/>
 
                     <ProgressBar
                         android:id="@+id/summaryProgressBar"
@@ -144,7 +144,7 @@
                     app:layout_constraintEnd_toEndOf="parent"
                     tools:text="asdfasdf"
                     android:textSize="16sp"
-                    android:textColor="@color/black"/>
+                    android:textColor="?attr/colorOnSurface"/>
             </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
