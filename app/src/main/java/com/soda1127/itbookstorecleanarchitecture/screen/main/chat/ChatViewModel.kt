@@ -125,7 +125,17 @@ class ChatViewModel @Inject constructor(
             }
             
             if (books.isNotEmpty()) {
-                Pair("🔍 **'$keyword' 관련 추천 도서**\n\n이 책들이 도움이 될 것 같아요! 더 자세한 정보가 필요하시면 말씀해 주세요.", books)
+                // 각 책의 요약 생성
+                val bookSummaries = mutableListOf<String>()
+                for (book in books) {
+                    val summary = geminiService.generateBookSummary(book.title, book.url)
+                    bookSummaries.add("📚 **${book.title}**\n$summary")
+                }
+                
+                val summaryText = bookSummaries.joinToString("\n\n")
+                val message = "🔍 **'$keyword' 관련 추천 도서**\n\n$summaryText\n\n이 책들이 도움이 될 것 같아요! 더 자세한 정보가 필요하시면 말씀해 주세요."
+                
+                Pair(message, books)
             } else {
                 Pair("죄송합니다. '$keyword' 관련 도서를 찾을 수 없습니다. 다른 키워드로 다시 시도해 보세요.", emptyList())
             }
