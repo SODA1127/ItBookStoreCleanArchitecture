@@ -123,6 +123,9 @@ dependencies {
 
     // Coil for image loading
     implementation libs.coil.compose
+    
+    // Markdown support
+    implementation "com.github.jeziellago:compose-markdown:0.3.6"
 
     // JUnit 5
     implementation(platform(libs.junit.bom))

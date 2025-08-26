@@ -57,12 +57,14 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity
+import dev.jeziellago.compose.markdowntext.MarkdownText
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen
@@ -217,13 +219,13 @@ fun ChatMessage(message: ChatMessage) {
             Column(
                 modifier = Modifier.padding(12.dp)
             ) {
-                Text(
-                    text = message.content,
+                MarkdownText(
+                    markdown = message.content,
                     color = if (isUser) 
                         MaterialTheme.colorScheme.onPrimary 
                     else 
                         MaterialTheme.colorScheme.onSurfaceVariant,
-                    style = MaterialTheme.typography.bodyMedium
+                    fontSize = 14.sp
                 )
                 
                 // 책 목록이 있는 경우 표시
