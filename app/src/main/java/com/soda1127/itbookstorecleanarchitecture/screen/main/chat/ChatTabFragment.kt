@@ -14,7 +14,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -51,6 +57,12 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
+import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen
@@ -202,15 +214,32 @@ fun ChatMessage(message: ChatMessage) {
                     MaterialTheme.colorScheme.surfaceVariant
             )
         ) {
-            Text(
-                text = message.content,
-                modifier = Modifier.padding(12.dp),
-                color = if (isUser) 
-                    MaterialTheme.colorScheme.onPrimary 
-                else 
-                    MaterialTheme.colorScheme.onSurfaceVariant,
-                style = MaterialTheme.typography.bodyMedium
-            )
+            Column(
+                modifier = Modifier.padding(12.dp)
+            ) {
+                Text(
+                    text = message.content,
+                    color = if (isUser) 
+                        MaterialTheme.colorScheme.onPrimary 
+                    else 
+                        MaterialTheme.colorScheme.onSurfaceVariant,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                // 책 목록이 있는 경우 표시
+                message.books?.let { books ->
+                    if (books.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            items(books) { book ->
+                                BookRecommendationItem(book = book)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
@@ -274,6 +303,63 @@ fun ChatInput(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun BookRecommendationItem(book: BookEntity) {
+    val context = LocalContext.current
+    
+    Card(
+        modifier = Modifier
+            .width(120.dp)
+            .height(180.dp)
+            .clickable {
+                context.startActivity(
+                    BookDetailActivity.newIntent(context, book.isbn13, book.title)
+                )
+            },
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            // 책 이미지
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(book.image)
+                    .crossfade(true)
+                    .build(),
+                contentDescription = book.title,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp),
+                contentScale = ContentScale.Crop
+            )
+            
+            Spacer(modifier = Modifier.height(4.dp))
+            
+            // 책 제목
+            Text(
+                text = book.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 2,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+            )
+            
+            Spacer(modifier = Modifier.height(2.dp))
+            
+            // 가격
+            Text(
+                text = book.price,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }

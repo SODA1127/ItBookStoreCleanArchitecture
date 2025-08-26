@@ -121,6 +121,9 @@ dependencies {
     implementation libs.androidx.foundation.layout
     debugImplementation libs.androidx.ui.tooling
 
+    // Coil for image loading
+    implementation libs.coil.compose
+
     // JUnit 5
     implementation(platform(libs.junit.bom))
     implementation libs.junit.jupiter.api

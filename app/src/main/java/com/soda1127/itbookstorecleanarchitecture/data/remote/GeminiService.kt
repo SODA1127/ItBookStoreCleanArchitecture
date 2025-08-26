@@ -29,4 +29,14 @@ class GeminiService @Inject constructor() {
         // 새로운 채팅 세션 시작
         chat = generativeModel.startChat()
     }
+
+    suspend fun extractBookKeyword(userMessage: String): String = withContext(Dispatchers.IO) {
+        try {
+            val prompt = "사용자가 IT 도서를 추천받고 싶어합니다. 다음 메시지에서 IT 도서 검색에 적합한 영어 키워드 하나만 추출해주세요. 추가 설명 없이 영어 키워드만 반환하세요: $userMessage"
+            val response = generativeModel.generateContent(prompt)
+            response.text?.trim() ?: "programming"
+        } catch (e: Exception) {
+            "programming" // 기본값
+        }
+    }
 }

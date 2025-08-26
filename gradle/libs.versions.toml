@@ -1,5 +1,6 @@
 [versions]
 agp = "8.11.1"
+coilCompose = "2.7.0"
 compiler = "4.16.0"
 composeBom = "2025.08.00"
 flowTestObserver = "1.6.2"
@@ -56,6 +57,7 @@ androidx-runtime = { module = "androidx.compose.runtime:runtime" }
 androidx-ui = { module = "androidx.compose.ui:ui" }
 androidx-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
 androidx-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coilCompose" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
