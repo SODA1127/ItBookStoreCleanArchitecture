@@ -12,6 +12,7 @@ import com.soda1127.itbookstorecleanarchitecture.screen.base.ScrollableScreen
 import com.soda1127.itbookstorecleanarchitecture.screen.main.bookmark.BookmarkTabFragment
 import com.soda1127.itbookstorecleanarchitecture.screen.main.search.SearchTabFragment
 import com.soda1127.itbookstorecleanarchitecture.screen.main.newtab.BookNewTabFragment
+import com.soda1127.itbookstorecleanarchitecture.screen.main.chat.ChatTabFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -46,6 +47,10 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
                     showFragment(SearchTabFragment.TAG)
                     true
                 }
+                R.id.menu_chat -> {
+                    showFragment(ChatTabFragment.TAG)
+                    true
+                }
                 else -> false
             }
         }
@@ -65,6 +70,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
             R.id.menu_new -> scrollFragmentTop(BookNewTabFragment.TAG)
             R.id.menu_bookmark -> scrollFragmentTop(BookmarkTabFragment.TAG)
             R.id.menu_history -> scrollFragmentTop(SearchTabFragment.TAG)
+            R.id.menu_chat -> scrollFragmentTop(ChatTabFragment.TAG)
             else -> Unit
         }
 
@@ -99,6 +105,7 @@ class MainActivity : BaseActivity<MainViewModel, ActivityMainBinding>() {
             BookNewTabFragment.TAG -> BookNewTabFragment.newInstance()
             BookmarkTabFragment.TAG -> BookmarkTabFragment.newInstance()
             SearchTabFragment.TAG -> SearchTabFragment.newInstance()
+            ChatTabFragment.TAG -> ChatTabFragment.newInstance()
             else -> null
         }
 

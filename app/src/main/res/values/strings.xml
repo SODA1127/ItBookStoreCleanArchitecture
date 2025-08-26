@@ -4,6 +4,7 @@
     <string name="new_tab">New</string>
     <string name="bookmark_tab">Bookmark</string>
     <string name="search_tab">Search</string>
+    <string name="chat_tab">Chat</string>
     <string name="find_books_text">Let\'s discover books!</string>
     <string name="write_hint">Please write your memo</string>
     <string name="search_by_keyword">search by keyword</string>
