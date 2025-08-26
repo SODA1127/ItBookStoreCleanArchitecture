@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.parcelize)
+    alias(libs.plugins.compose.compiler)
 
     id("de.mannodermaus.android-junit5") version "1.13.1.0"
     alias(libs.plugins.google.gms.google.services)
@@ -43,6 +44,13 @@ android {
         enabled true
     }
 
+    buildFeatures {
+        compose true
+    }
+    
+    composeOptions {
+        kotlinCompilerExtensionVersion = "2.2.0"
+    }
 }
 
 dependencies {
@@ -102,6 +110,16 @@ dependencies {
     kspTest libs.hilt.compiler
 
     implementation libs.androidx.fragment.ktx
+
+    // Compose
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.ui
+    implementation libs.androidx.ui.tooling.preview
+    implementation libs.androidx.material3
+    implementation libs.androidx.runtime
+    implementation libs.androidx.foundation
+    implementation libs.androidx.foundation.layout
+    debugImplementation libs.androidx.ui.tooling
 
     // JUnit 5
     implementation(platform(libs.junit.bom))
