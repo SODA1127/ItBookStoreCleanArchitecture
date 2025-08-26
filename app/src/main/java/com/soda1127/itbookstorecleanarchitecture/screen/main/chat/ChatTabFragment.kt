@@ -62,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
@@ -245,54 +248,86 @@ fun ChatScreen(viewModel: ChatViewModel) {
 @Composable
 fun ChatMessage(message: ChatMessage) {
     val isUser = message.isFromUser
+    
+    // 시간 포맷팅
+    val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
+    val timeText = timeFormat.format(Date(message.timestamp))
+
 
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start
     ) {
-        Card(
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .padding(vertical = 4.dp),
-            shape = RoundedCornerShape(
-                topStart = 16.dp,
-                topEnd = 16.dp,
-                bottomStart = if (isUser) 16.dp else 4.dp,
-                bottomEnd = if (isUser) 4.dp else 16.dp
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = if (isUser)
-                    MaterialTheme.colorScheme.primary
-                else
-                    MaterialTheme.colorScheme.surfaceVariant
-            )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = if (isUser) Arrangement.End else Arrangement.Start,
+            verticalAlignment = Alignment.Bottom
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp)
-            ) {
-                MarkdownText(
-                    markdown = message.content,
-                    color = if (isUser)
-                        MaterialTheme.colorScheme.onPrimary
-                    else
-                        MaterialTheme.colorScheme.onSurface,
-                    fontSize = 14.sp
+            if (isUser) {
+                Text(
+                    text = timeText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
                 )
+            }
 
-                // 책 목록이 있는 경우 표시
-                message.books?.let { books ->
-                    if (books.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        LazyRow(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            items(books) { book ->
-                                BookRecommendationItem(book = book)
+            Card(
+                modifier = Modifier
+                    .widthIn(max = 280.dp)
+                    .padding(vertical = 4.dp),
+                shape = RoundedCornerShape(
+                    topStart = 16.dp,
+                    topEnd = 16.dp,
+                    bottomStart = if (isUser) 16.dp else 4.dp,
+                    bottomEnd = if (isUser) 4.dp else 16.dp
+                ),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isUser)
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(12.dp)
+                ) {
+                    MarkdownText(
+                        markdown = message.content,
+                        color = if (isUser)
+                            MaterialTheme.colorScheme.onPrimary
+                        else
+                            MaterialTheme.colorScheme.onSurface,
+                        fontSize = 14.sp
+                    )
+
+                    // 책 목록이 있는 경우 표시
+                    message.books?.let { books ->
+                        if (books.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                items(books) { book ->
+                                    BookRecommendationItem(book = book)
+                                }
                             }
                         }
                     }
                 }
             }
+
+            if (isUser.not()) {
+                Text(
+                    text = timeText,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp, vertical = 2.dp),
+                )
+            }
+
         }
     }
 }
@@ -437,6 +472,7 @@ fun BookRecommendationItem(book: BookEntity) {
 )
 @Composable
 fun ChatScreenLightPreview() {
+    val currentTime = System.currentTimeMillis()
     MaterialTheme(
         colorScheme = lightColorScheme(
             primary = Color(0xFF6750A4),
@@ -493,7 +529,7 @@ fun ChatScreenLightPreview() {
                     id = "preview1",
                     content = "안녕하세요! IT 도서 추천을 도와드릴게요.",
                     isFromUser = false,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = currentTime - 300000, // 5분 전
                     books = null
                 )
             )
@@ -505,7 +541,7 @@ fun ChatScreenLightPreview() {
                     id = "preview2",
                     content = "안드로이드 개발 관련 책을 추천해주세요",
                     isFromUser = true,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = currentTime - 180000, // 3분 전
                     books = null
                 )
             )
@@ -517,7 +553,7 @@ fun ChatScreenLightPreview() {
                     id = "preview3",
                     content = "🔍 **'android' 관련 추천 도서**\n\n📚 **Learn Android Studio 3 with Kotlin**\n이 책은 Android 개발을 처음 시작하는 개발자들에게 적합합니다.",
                     isFromUser = false,
-                    timestamp = System.currentTimeMillis(),
+                    timestamp = currentTime - 60000, // 1분 전
                     books = listOf(
                         BookEntity(
                             title = "Learn Android Studio 3 with Kotlin",
@@ -525,120 +561,6 @@ fun ChatScreenLightPreview() {
                             isbn13 = "9781234567890",
                             price = "₩35,000",
                             image = "https://example.com/book1.jpg",
-                            url = "https://example.com/book1"
-                        )
-                    )
-                )
-            )
-            
-            Spacer(modifier = Modifier.weight(1f))
-            
-            // 입력 필드
-            ChatInput(
-                value = "안드로이드 개발",
-                onValueChange = {},
-                onSendMessage = {},
-                isLoading = false
-            )
-        }
-    }
-}
-
-@Preview(
-    name = "Chat Screen - Dark Theme",
-    showBackground = true,
-    backgroundColor = 0xFF1C1B1F
-)
-@Composable
-fun ChatScreenDarkPreview() {
-    MaterialTheme(
-        colorScheme = darkColorScheme(
-            primary = Color(0xFFD0BCFF),
-            onPrimary = Color(0xFF381E72),
-            primaryContainer = Color(0xFF4F378B),
-            onPrimaryContainer = Color(0xFFEADDFF),
-            secondary = Color(0xFFCCC2DC),
-            onSecondary = Color(0xFF332D41),
-            secondaryContainer = Color(0xFF4A4458),
-            onSecondaryContainer = Color(0xFFE8DEF8),
-            tertiary = Color(0xFFEFB8C8),
-            onTertiary = Color(0xFF492532),
-            tertiaryContainer = Color(0xFF633B48),
-            onTertiaryContainer = Color(0xFFFFD8E4),
-            error = Color(0xFFFFB4AB),
-            onError = Color(0xFF690005),
-            errorContainer = Color(0xFF93000A),
-            onErrorContainer = Color(0xFFFFDAD6),
-            background = Color(0xFF1C1B1F),
-            onBackground = Color(0xFFE6E1E5),
-            surface = Color(0xFF1C1B1F),
-            onSurface = Color(0xFFE6E1E5),
-            surfaceVariant = Color(0xFF49454F),
-            onSurfaceVariant = Color(0xFFCAC4D0),
-            outline = Color(0xFF938F99),
-            outlineVariant = Color(0xFF49454F)
-        )
-    ) {
-        // 간단한 채팅 UI 미리보기
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-        ) {
-            // TopAppBar
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 4.dp
-            ) {
-                Text(
-                    text = "Gemini AI 채팅",
-                    style = MaterialTheme.typography.headlineSmall,
-                    modifier = Modifier.padding(16.dp),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // 채팅 메시지들
-            ChatMessage(
-                ChatMessage(
-                    id = "preview1",
-                    content = "안녕하세요! IT 도서 추천을 도와드릴게요.",
-                    isFromUser = false,
-                    timestamp = System.currentTimeMillis(),
-                    books = null
-                )
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            ChatMessage(
-                ChatMessage(
-                    id = "preview2",
-                    content = "안드로이드 개발 관련 책을 추천해주세요",
-                    isFromUser = true,
-                    timestamp = System.currentTimeMillis(),
-                    books = null
-                )
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            ChatMessage(
-                ChatMessage(
-                    id = "preview3",
-                    content = "🔍 **'android' 관련 추천 도서**\n\n📚 **Learn Android Studio 3 with Kotlin**\n이 책은 Android 개발을 처음 시작하는 개발자들에게 적합합니다.",
-                    isFromUser = false,
-                    timestamp = System.currentTimeMillis(),
-                    books = listOf(
-                        BookEntity(
-                            title = "Learn Android Studio 3 with Kotlin",
-                            subtitle = "Android Development Guide",
-                            isbn13 = "9781234567890",
-                            price = "₩35,000",
-                            image = "https://itbook.store/img/books/9781617293290.png",
                             url = "https://example.com/book1"
                         )
                     )
