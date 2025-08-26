@@ -1,6 +1,9 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.search
 
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadRetryModel
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadingModel
@@ -28,7 +31,7 @@ class SearchTabViewModel @Inject constructor(
 
     override fun fetchData(): Job = viewModelScope.launch {
         setState(
-            SearchTabState.Loading
+            SearchTabState.Loading()
         )
         try {
             searchRepository.getAllSearchHistories().collect { searchHistories ->
@@ -83,18 +86,38 @@ class SearchTabViewModel @Inject constructor(
         }
     }
 
-    fun searchByKeyword(keyword: String) = viewModelScope.launch {
+    fun searchByKeyword(keyword: String, withAIGeneration: Boolean = false) = viewModelScope.launch {
+        if (keyword.trimIndent().isEmpty()) return@launch
         try {
-            setState(
-                SearchTabState.Loading
-            )
+            val loadingState = SearchTabState.Loading(withAIGeneration = withAIGeneration)
+
+            setState(loadingState)
+
+            val keywordToSearch =
+                if (withAIGeneration) {
+                    val generativeModel = Firebase.ai(backend = GenerativeBackend.googleAI())
+                        .generativeModel("gemini-2.5-flash")
+
+                    val response = generativeModel.generateContent(
+                        "Suggest a book related to '$keyword' that is IT. Provide only one word(just use eng) of the book without any additional explanation."
+                    )
+
+                    val keywordByAI = response.text.orEmpty()
+
+                    setState(loadingState.copy(generatedKeyword = keywordByAI))
+
+                    keywordByAI
+                } else {
+                    keyword
+                }
+
             searchRepository.saveSearchHistory(
                 SearchHistoryEntity(
-                    searchKeyword = keyword,
+                    searchKeyword = keywordToSearch,
                     searchTimestamp = Date().time
                 )
             )
-            bookStoreRepository.searchBooksByKeyword(keyword).collect { (bookList, page, total) ->
+            bookStoreRepository.searchBooksByKeyword(keywordToSearch).collect { (bookList, page, total) ->
                 setState(
                     SearchTabState.Success.SearchResult(
                         bookList.map { book ->
@@ -108,7 +131,7 @@ class SearchTabViewModel @Inject constructor(
                                 url = book.url
                             )
                         },
-                        keyword,
+                        keywordToSearch,
                         page,
                         total
                     )

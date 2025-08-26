@@ -8,6 +8,7 @@
     <string name="write_hint">Please write your memo</string>
     <string name="search_by_keyword">search by keyword</string>
     <string name="search">search</string>
+    <string name="search_with_ai">search with AI</string>
     <string name="empty_search_history">검색 이력이 없습니다.</string>
     <string name="empty_search_result">검색 결과가 없습니다.</string>
     <string name="error_occurred">Oops, Error Occurred : %s</string>

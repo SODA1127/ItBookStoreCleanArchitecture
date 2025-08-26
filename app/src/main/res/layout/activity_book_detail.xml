@@ -58,30 +58,94 @@
                 app:layout_constraintDimensionRatio="w,9:16"
                 android:background="@color/black"/>
 
-            <EditText
-                android:id="@+id/bookMemoInput"
-                android:layout_width="0dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_margin="16dp"
                 app:layout_constraintTop_toBottomOf="@id/bookImageView"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                tools:text="memo"
-                android:hint="@string/write_hint"
-                android:textSize="16sp"
-                android:textColor="@color/black"/>
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:orientation="vertical">
+                <EditText
+                    android:id="@+id/bookMemoInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    tools:text="memo"
+                    android:hint="@string/write_hint"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"/>
 
-            <TextView
-                android:id="@+id/bookInfoTextView"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:layout_constraintTop_toBottomOf="@id/bookMemoInput"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                tools:text="asdfasdf"
-                android:textSize="16sp"
-                android:textColor="@color/black"/>
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center">
+                    <TextView
+                        android:id="@+id/bookSummaryTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="16dp"
+                        tools:text="Book Summary"
+                        android:textSize="16sp"
+                        android:textColor="@color/black"/>
+
+                    <ProgressBar
+                        android:id="@+id/summaryProgressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="@id/bookSummaryTextView"
+                        app:layout_constraintEnd_toEndOf="@id/bookSummaryTextView"
+                        app:layout_constraintTop_toTopOf="@id/bookSummaryTextView"
+                        app:layout_constraintBottom_toBottomOf="@id/bookSummaryTextView"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </FrameLayout>
+
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    style="?android:attr/ratingBarStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="0.5"
+                    android:max="5"
+                    tools:rating="3.0"
+                    android:layout_margin="16dp"/>
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/ratingSummaryTextView"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="16dp" />
+                    <ProgressBar
+                        android:id="@+id/ratingSummaryProgressBar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintStart_toStartOf="@id/bookSummaryTextView"
+                        app:layout_constraintEnd_toEndOf="@id/bookSummaryTextView"
+                        app:layout_constraintTop_toTopOf="@id/bookSummaryTextView"
+                        app:layout_constraintBottom_toBottomOf="@id/bookSummaryTextView"
+                        android:layout_gravity="center"
+                        android:visibility="gone"
+                        tools:visibility="visible"/>
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/bookInfoTextView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    app:layout_constraintTop_toBottomOf="@id/bookSummaryTextView"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    tools:text="asdfasdf"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"/>
+            </LinearLayout>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 

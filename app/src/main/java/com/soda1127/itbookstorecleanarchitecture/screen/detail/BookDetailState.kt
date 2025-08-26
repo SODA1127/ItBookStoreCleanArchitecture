@@ -12,8 +12,18 @@ sealed class BookDetailState {
     data class Success(
         val bookInfoEntity: BookInfoEntity,
         val isLiked: Boolean,
-        val memo: String
-    ): BookDetailState()
+        val memo: String,
+        val summaryState: SummaryState,
+    ): BookDetailState() {
+
+        data class SummaryState(
+            val bookSummary: String? = null,
+            val isSummaryGenerating: Boolean = false,
+            val ratingSummary: String? = null,
+            val isRatingSummaryGenerating: Boolean = false,
+        )
+
+    }
 
     object SaveMemo: BookDetailState()
 

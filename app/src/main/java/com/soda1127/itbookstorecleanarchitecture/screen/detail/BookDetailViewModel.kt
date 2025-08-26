@@ -1,7 +1,12 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.detail
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.Firebase
+import com.google.firebase.ai.ai
+import com.google.firebase.ai.type.GenerativeBackend
+import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
@@ -9,9 +14,13 @@ import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
 import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity.Companion.KEY_ISBN13
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.coroutines.cancellation.CancellationException
 
 @HiltViewModel
 class BookDetailViewModel @Inject constructor(
@@ -25,45 +34,123 @@ class BookDetailViewModel @Inject constructor(
 
     private val isbn13 by lazy { savedStateHandle.get<String>(KEY_ISBN13) }
 
+    private val generativeModel by lazy {
+        Firebase.ai(backend = GenerativeBackend.googleAI())
+            .generativeModel("gemini-2.5-flash")
+    }
+
     override fun fetchData(): Job = viewModelScope.launch {
+        setState(BookDetailState.Loading)
         try {
-            setState(
-                BookDetailState.Loading
+            val initialIsbn = isbn13 ?: run {
+                setState(BookDetailState.Error.NotFound)
+                return@launch
+            }
+
+            val initialBookInfo = bookStoreRepository.getBookInfo(initialIsbn).first()
+            if (initialBookInfo == null) {
+                setState(BookDetailState.Error.NotFound)
+                return@launch
+            }
+
+            val successState = BookDetailState.Success(
+                bookInfoEntity = initialBookInfo,
+                isLiked = bookStoreRepository.getBookInWishList(initialIsbn).first() != null,
+                memo = bookMemoRepository.getBookMemo(initialIsbn).first()?.memo ?: "",
+                summaryState = BookDetailState.Success.SummaryState(isSummaryGenerating = true, isRatingSummaryGenerating = true)
             )
-            isbn13?.let { isbn13 ->
-                combine(
-                    bookStoreRepository.getBookInWishList(isbn13),
-                    bookStoreRepository.getBookInfo(isbn13),
-                    bookMemoRepository.getBookMemo(isbn13)
-                ) { bookInfoEntityInWishList, bookInfoEntity, bookMemoEntity ->
-                    Triple(bookInfoEntityInWishList, bookInfoEntity, bookMemoEntity)
-                }.collect { (bookInfoEntityInWishList, bookInfoEntity, bookMemoEntity) ->
-                    if (bookInfoEntity != null) {
+            setState(successState)
+
+            launch {
+                generateSummary(initialBookInfo).map { it.text }.collect { summaryText ->
+                    (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
+                        val summaryState = currentState.summaryState
                         setState(
-                            BookDetailState.Success(
-                                bookInfoEntity,
-                                bookInfoEntityInWishList != null,
-                                bookMemoEntity?.memo ?: ""
+                            currentState.copy(
+                                summaryState = summaryState.copy(
+                                    bookSummary = summaryState.bookSummary.orEmpty().ifEmpty { "[내용요약]\n" } + summaryText.orEmpty(),
+                                    isSummaryGenerating = false
+                                )
                             )
-                        )
-                    } else {
-                        setState(
-                            BookDetailState.Error.NotFound
                         )
                     }
                 }
-            } ?: kotlin.run {
-                setState(
-                    BookDetailState.Error.NotFound
-                )
             }
+
+            launch {
+                generateRatingSummary(initialBookInfo).map { it.text }.collect { ratingSummaryText ->
+                    (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
+                        val summaryState = currentState.summaryState
+                        setState(
+                            currentState.copy(
+                                summaryState = summaryState.copy(
+                                    ratingSummary = summaryState.ratingSummary.orEmpty().ifEmpty { "[평점요약]\n" } + ratingSummaryText.orEmpty(),
+                                    isRatingSummaryGenerating = false
+                                )
+                            )
+                        )
+                    }
+                }
+            }
+
+            // '찜하기' 상태 관찰
+            bookStoreRepository.getBookInWishList(initialIsbn).collect { bookInWishList ->
+                (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentSuccessState ->
+                    setState(currentSuccessState.copy(isLiked = bookInWishList != null))
+                }
+            }
+
+            // '메모' 상태 관찰
+            bookMemoRepository.getBookMemo(initialIsbn).collect { bookMemo ->
+                (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentSuccessState ->
+                    setState(currentSuccessState.copy(memo = bookMemo?.memo ?: ""))
+                }
+            }
+
         } catch (e: Exception) {
-            e.printStackTrace()
-            setState(
-                BookDetailState.Error.Default(e)
-            )
+            // ✅ [핵심 수정 사항]
+            // 잡힌 예외가 실제 오류인지, 아니면 SDK에 의해 포장된 취소인지 확인합니다.
+            if (e.isCancellation()) {
+                // 근본 원인이 CancellationException이므로 정상적인 취소로 간주합니다.
+                Log.d("BookDetailViewModel", "Gemini generation was cancelled (wrapped exception detected).")
+                // 여기서 아무것도 하지 않거나, CancellationException을 다시 던져
+                // 상위 코루틴이 취소 흐름을 이어가도록 합니다.
+                throw CancellationException("Operation was cancelled", e)
+            } else {
+                // 이것이 진짜 예기치 못한 오류입니다 (네트워크, API 키 문제 등).
+                Log.e("BookDetailViewModel", "An unexpected error occurred during summary generation.", e)
+                (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
+                    setState(
+                        currentState.copy(
+                            summaryState = BookDetailState.Success.SummaryState(
+                                bookSummary = "[요약 실패]",
+                                isSummaryGenerating = false,
+                                ratingSummary = "[평가 요약 실패]"
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
+
+    private fun generateSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
+        """
+        Describe this book by this information : ${bookInfoEntity.title} ${bookInfoEntity.subtitle} ${bookInfoEntity.desc}
+        and this is the url to analyze this book's information : ${bookInfoEntity.url}
+        Please summarize in about 1000 characters.
+        And it should be written by korean.
+        """.trimIndent()
+    )
+
+    private fun generateRatingSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
+        """
+        [Goal] Please summarize the book's rating by analyzing the following information: ${bookInfoEntity.title}
+        Additional info : and you can search the book in the Amazon site through this url : ${bookInfoEntity.url}
+        Please summarize in about 300 characters.
+        And it should be written by korean.
+        """.trimIndent()
+    )
 
     fun toggleLikeButton() = viewModelScope.launch {
         try {
@@ -112,5 +199,20 @@ class BookDetailViewModel @Inject constructor(
     private fun setState(state: BookDetailState) {
         _bookDetailStateFlow.value = state
     }
+}
 
+// ViewModel 파일 상단이나 별도의 유틸리티 파일에 추가합니다.
+/**
+ * 예외의 근본 원인(root cause)이 CancellationException인지 재귀적으로 확인합니다.
+ * Firebase AI SDK처럼 CancellationException을 다른 예외로 감싸는 경우에 유용합니다.
+ */
+fun Throwable.isCancellation(): Boolean {
+    var cause: Throwable? = this
+    while (cause != null) {
+        if (cause is CancellationException) {
+            return true
+        }
+        cause = cause.cause
+    }
+    return false
 }

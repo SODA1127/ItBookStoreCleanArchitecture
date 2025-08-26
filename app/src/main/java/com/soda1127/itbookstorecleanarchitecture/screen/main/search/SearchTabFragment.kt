@@ -3,6 +3,8 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.search
 import android.os.Bundle
 import android.view.View
 import androidx.core.os.bundleOf
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -51,6 +53,7 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
 
             override fun onClickSearchHistoryItem(keyword: String) {
                 vm.searchByHistory(keyword)
+                binding.root.hideSoftInput()
             }
 
             override fun onClickRemoveItem(keyword: String) {
@@ -64,7 +67,7 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
         searchResultRecyclerView.adapter = searchResultAdapter
         searchHistoryRecyclerView.adapter = searchHistoryAdapter
         searchButton.setOnClickListener {
-            vm.searchByKeyword(searchInput.text.toString())
+            vm.searchByKeyword(searchInput.text.toString(), withAIGeneration = true)
             binding.root.hideSoftInput()
         }
         searchResultRecyclerView.setOnScrollChangeListener { _: View?, _: Int, _: Int, _: Int, _: Int -> nextPageRender() }
@@ -88,7 +91,7 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
         lifecycleScope.launchWhenStarted {
             vm.searchTabStateFlow.collect { state ->
                 when (state) {
-                    is SearchTabState.Loading -> handleLoading()
+                    is SearchTabState.Loading -> handleLoading(state)
                     is SearchTabState.Success.SearchResult -> handleSearchResult(state)
                     is SearchTabState.Success.SearchHistory -> handleSearchHistory(state)
                     is SearchTabState.Error -> handleError(state)
@@ -98,12 +101,18 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
         }
     }
 
-    private fun handleLoading() = with(binding) {
+    private fun handleLoading(state: SearchTabState.Loading) = with(binding) {
         errorContainerGroup.visibility = View.GONE
         emptyTextView.visibility = View.GONE
         searchResultRecyclerView.visibility = View.GONE
         searchHistoryRecyclerView.visibility = View.GONE
         progressBar.visibility = View.VISIBLE
+        aiGenerationProgressBar.isVisible = state.withAIGeneration
+
+        if (state.generatedKeyword != null) {
+            searchInput.setText(state.generatedKeyword)
+            searchInput.setSelection(searchInput.text.toString().length)
+        }
     }
 
     private fun handleSearchResult(state: SearchTabState.Success.SearchResult) = with(binding) {
@@ -120,6 +129,8 @@ class SearchTabFragment: BaseFragment<SearchTabViewModel, FragmentSearchTabBindi
             emptyTextView.visibility = View.VISIBLE
             emptyTextView.setText(R.string.empty_search_result)
         }
+
+        aiGenerationProgressBar.isGone = true
         searchResultAdapter.submitList(modelList)
     }
 

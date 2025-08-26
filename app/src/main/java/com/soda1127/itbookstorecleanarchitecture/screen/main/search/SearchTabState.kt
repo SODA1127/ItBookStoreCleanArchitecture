@@ -7,7 +7,10 @@ sealed class SearchTabState {
 
     object Uninitialized: SearchTabState()
 
-    object Loading: SearchTabState()
+    data class Loading(
+        val withAIGeneration: Boolean = false,
+        val generatedKeyword: String? = null,
+    ): SearchTabState()
 
     sealed class Success: SearchTabState() {
 
@@ -19,7 +22,7 @@ sealed class SearchTabState {
             val modelList: List<Model>,
             val searchKeyword: String? = null,
             val currentPage: String? = null,
-            val totalResultCount: Int? = null
+            val totalResultCount: Int? = null,
         ): SearchTabState()
 
     }

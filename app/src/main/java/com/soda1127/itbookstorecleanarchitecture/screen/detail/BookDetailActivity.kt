@@ -17,9 +17,9 @@ import com.soda1127.itbookstorecleanarchitecture.databinding.ActivityBookDetailB
 import com.soda1127.itbookstorecleanarchitecture.extensions.viewBinding
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseActivity
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
+@Suppress("NO_REFLECTION_IN_CLASS_PATH")
 @AndroidEntryPoint
 class BookDetailActivity : BaseActivity<BookDetailViewModel, ActivityBookDetailBinding>() {
 
@@ -91,6 +91,25 @@ class BookDetailActivity : BaseActivity<BookDetailViewModel, ActivityBookDetailB
         bookImageView.load(bookInfoEntity.image)
 
         bookMemoInput.setText(state.memo)
+
+        if (state.summaryState.isSummaryGenerating) {
+            bookSummaryTextView.text = "내용 요약 생성중..."
+            summaryProgressBar.visibility = View.VISIBLE
+        } else {
+            bookSummaryTextView.text = state.summaryState.bookSummary ?: "요약문이 존재하지 않습니다."
+            summaryProgressBar.visibility = View.GONE
+        }
+
+        if (state.summaryState.isRatingSummaryGenerating) {
+            ratingSummaryTextView.text = "평점 요약 생성중..."
+            ratingSummaryProgressBar.visibility = View.VISIBLE
+        } else {
+            ratingSummaryTextView.text = state.summaryState.ratingSummary ?: "평점 요약이 존재하지 않습니다."
+            ratingSummaryProgressBar.visibility = View.GONE
+        }
+
+        ratingBar.numStars = 5
+        ratingBar.rating = bookInfoEntity.rating
 
         var infoText = ""
         BookInfoEntity::class.members.forEach { property ->
