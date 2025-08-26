@@ -4,8 +4,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -13,13 +21,34 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.Fragment
@@ -74,58 +103,75 @@ fun ChatScreen(viewModel: ChatViewModel) {
     val chatState by viewModel.chatState.collectAsState()
     val listState = rememberLazyListState()
     var messageText by remember { mutableStateOf("") }
-    
+    var keyboardVisible by remember { mutableStateOf(false) }
+
     LaunchedEffect(chatState.messages.size) {
         if (chatState.messages.isNotEmpty()) {
             listState.animateScrollToItem(chatState.messages.size - 1)
         }
     }
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Gemini AI 채팅") },
-                actions = {
-                    if (chatState.messages.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.clearChat() }) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = "채팅 초기화"
-                            )
+    val topBarBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    val density = LocalDensity.current
+    
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .onSizeChanged { size ->
+                // 키보드가 올라왔는지 감지 (화면 높이가 줄어들면 키보드가 올라온 것)
+                val screenHeight = with(density) { size.height.toDp() }
+                keyboardVisible = screenHeight < 600.dp // 임계값 설정
+            }
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                TopAppBar(
+                    title = { Text("Gemini AI 채팅") },
+                    actions = {
+                        if (chatState.messages.isNotEmpty()) {
+                            IconButton(onClick = { viewModel.clearChat() }) {
+                                Icon(
+                                    imageVector = Icons.Default.Clear,
+                                    contentDescription = "채팅 초기화"
+                                )
+                            }
                         }
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    ),
+                    scrollBehavior = topBarBehavior
                 )
-            )
-        },
-        bottomBar = {
-            ChatInput(
-                value = messageText,
-                onValueChange = { messageText = it },
-                onSendMessage = { text ->
-                    if (text.isNotBlank()) {
-                        viewModel.sendMessage(text)
-                        messageText = ""
-                    }
-                },
-                isLoading = chatState.isLoading
-            )
-        }
-    ) { paddingValues ->
-        // 채팅 메시지 목록
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            state = listState,
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            contentPadding = PaddingValues(vertical = 8.dp)
-        ) {
-            items(chatState.messages) { message ->
-                ChatMessage(message)
+            },
+            bottomBar = {
+                ChatInput(
+                    value = messageText,
+                    onValueChange = { messageText = it },
+                    onSendMessage = { text ->
+                        if (text.isNotBlank()) {
+                            viewModel.sendMessage(text)
+                            messageText = ""
+                        }
+                    },
+                    isLoading = chatState.isLoading
+                )
+            }
+        ) { paddingValues ->
+            // 채팅 메시지 목록
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp),
+                state = listState,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(vertical = 8.dp)
+            ) {
+                items(chatState.messages) { message ->
+                    ChatMessage(message)
+                }
             }
         }
     }
@@ -223,7 +269,7 @@ fun ChatInput(
                     )
                 } else {
                     Icon(
-                        imageVector = Icons.Default.Send,
+                        imageVector = Icons.AutoMirrored.Filled.Send,
                         contentDescription = "전송"
                     )
                 }
