@@ -10,6 +10,7 @@ import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadingModel
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
 import com.soda1127.itbookstorecleanarchitecture.data.entity.SearchHistoryEntity
+import com.soda1127.itbookstorecleanarchitecture.data.remote.GeminiService
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookSearchRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class SearchTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
-    private val searchRepository: BookSearchRepository
+    private val searchRepository: BookSearchRepository,
+    private val geminiService: GeminiService,
 ) : BaseViewModel() {
 
     private val _historyTabStateFlow = MutableStateFlow<SearchTabState>(SearchTabState.Uninitialized)
@@ -95,14 +97,7 @@ class SearchTabViewModel @Inject constructor(
 
             val keywordToSearch =
                 if (withAIGeneration) {
-                    val generativeModel = Firebase.ai(backend = GenerativeBackend.googleAI())
-                        .generativeModel("gemini-2.5-flash")
-
-                    val response = generativeModel.generateContent(
-                        "Suggest a book related to '$keyword' that is IT. Provide only one word(just use eng) of the book without any additional explanation."
-                    )
-
-                    val keywordByAI = response.text.orEmpty()
+                    val keywordByAI = geminiService.extractBookKeyword(keyword)
 
                     setState(loadingState.copy(generatedKeyword = keywordByAI))
 
