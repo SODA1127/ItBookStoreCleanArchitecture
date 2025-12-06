@@ -5,6 +5,7 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.material3.SnackbarHostState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -12,7 +13,8 @@ import androidx.navigation.navArgument
 import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailScreen
 
 fun NavGraphBuilder.bookDetailGraph(
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    snackState: SnackbarHostState
 ) {
     composable(
         route = Route.Detail.route,
@@ -58,7 +60,8 @@ fun NavGraphBuilder.bookDetailGraph(
         BookDetailScreen(
             isbn13 = isbn13,
             title = title,
-            onBackClick = onBackClick
+            onBackClick = onBackClick,
+            snackState = snackState,
         )
     }
 }

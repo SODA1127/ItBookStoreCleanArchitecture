@@ -3,6 +3,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
@@ -14,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
@@ -57,7 +59,10 @@ fun BookNewContent(
             is NewTabState.Success -> {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = paddingValues
+                    contentPadding = PaddingValues(
+                        top = paddingValues.calculateTopPadding() + 8.dp,
+                        bottom = paddingValues.calculateBottomPadding() + 8.dp,
+                    )
                 ) {
                     items(state.modelList) { book ->
                         BookItem(
@@ -89,17 +94,16 @@ fun BookNewContentPreview() {
                 NewTabState.Success(
                     modelList =
                         listOf(
-                            com.soda1127.itbookstorecleanarchitecture.model.book
-                                .BookModel(
-                                    id = "1",
-                                    title = "Preview Book",
-                                    subtitle = "Subtitle",
-                                    isbn13 = "123",
-                                    price = "$10",
-                                    image =
-                                        "https://itbook.store/img/books/9781484239063.png",
-                                    url = ""
-                                )
+                            BookModel(
+                                id = "1",
+                                title = "Preview Book",
+                                subtitle = "Subtitle",
+                                isbn13 = "123",
+                                price = "$10",
+                                image =
+                                    "https://itbook.store/img/books/9781484239063.png",
+                                url = ""
+                            )
                         )
                 ),
             onBookClick = { _, _ -> },

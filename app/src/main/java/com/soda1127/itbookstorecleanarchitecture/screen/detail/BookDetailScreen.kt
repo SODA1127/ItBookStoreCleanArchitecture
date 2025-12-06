@@ -2,19 +2,21 @@ package com.soda1127.itbookstorecleanarchitecture.screen.detail
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -23,10 +25,13 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,12 +59,27 @@ fun BookDetailScreen(
     isbn13: String,
     title: String,
     viewModel: BookDetailViewModel = hiltViewModel(),
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit,
+    snackState: SnackbarHostState
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
+    val event = viewModel.eventFlow.collectAsState(initial = null).value
 
     LaunchedEffect(Unit) {
         viewModel.fetchData()
+    }
+
+    LaunchedEffect(event) {
+        when (val event = event) {
+            is BookDetailEvent.ShowToast -> {
+                snackState.showSnackbar(
+                    message = event.message,
+                    duration = SnackbarDuration.Short
+                )
+            }
+
+            else -> {}
+        }
     }
 
     // Handle SaveMemo state which triggers back in existing code.
@@ -106,7 +126,7 @@ fun BookDetailScreen(
                     BookDetailContent(
                         state = currentState,
                         onLikeClick = { viewModel.toggleLikeButton() },
-                        onSaveMemo = { memo -> viewModel.saveMemo(memo) }
+                        onSaveMemo = { memo -> viewModel.saveMemo(memo) },
                     )
                 }
 
@@ -140,7 +160,12 @@ fun BookDetailContent(
             .verticalScroll(scrollState)
             .padding(16.dp)
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize()
+        ) {
             AsyncImage(
                 model = state.bookInfoEntity.image,
                 contentDescription = null,
@@ -152,39 +177,61 @@ fun BookDetailContent(
 
             Spacer(modifier = Modifier.size(16.dp))
 
-            Column {
-                Text(
-                    text = state.bookInfoEntity.title,
-                    style = MaterialTheme.typography.titleLarge
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = state.bookInfoEntity.subtitle,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = state.bookInfoEntity.price,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .heightIn(min = 120.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    Text(
+                        text = state.bookInfoEntity.title,
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    if (state.bookInfoEntity.subtitle.isNotEmpty()) {
+                        Text(
+                            text = state.bookInfoEntity.subtitle,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    Box(
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            modifier = Modifier.align(Alignment.CenterStart),
+                            text = state.bookInfoEntity.price,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+
+                        IconButton(
+                            onClick = onLikeClick,
+                            modifier = Modifier.align(Alignment.CenterEnd)
+                        ) {
+
+
+                            val iconRes = if (state.isLiked) R.drawable.ic_heart_enable else R.drawable.ic_heart_disable
+                            val tint = if (state.isLiked) Color.Red else Color.Gray
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = iconRes),
+                                contentDescription = "Like",
+                                tint = tint
+                            )
+                        }
+                    }
+                }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-
-        // Like Button
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-            IconButton(onClick = onLikeClick) {
-                val iconRes = if (state.isLiked) R.drawable.ic_heart_enable else R.drawable.ic_heart_disable
-                val tint = if (state.isLiked) Color.Red else Color.Gray
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = iconRes),
-                    contentDescription = "Like",
-                    tint = tint
-                )
-            }
-        }
 
         Spacer(modifier = Modifier.height(16.dp))
 

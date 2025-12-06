@@ -1,12 +1,17 @@
 package com.soda1127.itbookstorecleanarchitecture.navigation
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 
 @Composable
-fun MainNavHost(navController: NavHostController, innerPadding: PaddingValues) {
+fun MainNavHost(
+    navController: NavHostController,
+    innerPadding: PaddingValues,
+    snackState: SnackbarHostState
+) {
     // Implementation goes here
     NavHost(navController = navController, startDestination = Route.New.route) {
         bookNewGraph(
@@ -30,6 +35,9 @@ fun MainNavHost(navController: NavHostController, innerPadding: PaddingValues) {
             paddingValues = innerPadding
         )
 
-        bookDetailGraph(onBackClick = { navController.popBackStack() })
+        bookDetailGraph(
+            onBackClick = { navController.popBackStack() },
+            snackState = snackState
+        )
     }
 }

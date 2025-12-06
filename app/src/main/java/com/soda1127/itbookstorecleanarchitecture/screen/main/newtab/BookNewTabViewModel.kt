@@ -5,6 +5,7 @@ import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
+import com.soda1127.itbookstorecleanarchitecture.screen.base.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.Job
@@ -14,7 +15,7 @@ import kotlinx.coroutines.launch
 @HiltViewModel
 class BookNewTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository
-) : BaseViewModel<NewTabState>() {
+) : BaseViewModel<NewTabState, Event>() {
 
     override fun getInitialState(): NewTabState = NewTabState.Uninitialized
 

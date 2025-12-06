@@ -70,7 +70,13 @@ fun BookmarkContent(
                         modifier = Modifier.padding(paddingValues)
                     ) { Text(text = "No Bookmarks", modifier = Modifier.padding(16.dp)) }
                 } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = paddingValues) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(
+                            top = paddingValues.calculateTopPadding() + 8.dp,
+                            bottom = paddingValues.calculateBottomPadding() + 8.dp
+                        )
+                    ) {
                         items(state.modelList) { book ->
                             BookItem(
                                 book = book,

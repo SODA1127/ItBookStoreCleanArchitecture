@@ -10,6 +10,7 @@ import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadingModel
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
+import com.soda1127.itbookstorecleanarchitecture.screen.base.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -20,7 +21,7 @@ import javax.inject.Inject
 class SearchTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
     private val searchRepository: BookSearchRepository
-) : BaseViewModel<SearchTabState>() {
+) : BaseViewModel<SearchTabState, Event>() {
 
     override fun getInitialState(): SearchTabState = SearchTabState.Uninitialized
 

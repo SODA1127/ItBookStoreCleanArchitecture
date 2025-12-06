@@ -5,6 +5,7 @@ import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
+import com.soda1127.itbookstorecleanarchitecture.screen.base.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
@@ -13,7 +14,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookmarkTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository
-): BaseViewModel<BookmarkState>() {
+) : BaseViewModel<BookmarkState, Event>() {
 
     override fun getInitialState(): BookmarkState = BookmarkState.Uninitialized
 

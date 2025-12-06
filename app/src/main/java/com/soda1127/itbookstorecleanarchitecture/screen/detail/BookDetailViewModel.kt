@@ -17,7 +17,7 @@ class BookDetailViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
     private val bookMemoRepository: BookMemoRepository,
     private val savedStateHandle: SavedStateHandle
-) : BaseViewModel<BookDetailState>() {
+) : BaseViewModel<BookDetailState, BookDetailEvent>() {
 
     override fun getInitialState(): BookDetailState = BookDetailState.Uninitialized
 
@@ -76,6 +76,13 @@ class BookDetailViewModel @Inject constructor(
                         isLiked = state.isLiked.not()
                     )
                 )
+                sendEvent(
+                    BookDetailEvent.ShowToast(
+                        message =
+                            if (state.isLiked) "위시리스트에서 제거되었습니다."
+                            else "위시리스트에 추가되었습니다."
+                    )
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -86,21 +93,24 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun saveMemo(memo: String) = viewModelScope.launch {
-        isbn13?.let { isbn13 ->
-            bookMemoRepository.saveBookMemo(
-                BookMemoEntity(
-                    isbn13,
-                    memo
-                )
+        val isbn13 = isbn13 ?: run {
+            sendEvent(
+                BookDetailEvent.ShowToast(message = "저장할 수 없습니다")
             )
-            setState(
-                BookDetailState.SaveMemo
-            )
-        } ?: kotlin.run {
-            setState(
-                BookDetailState.SaveMemo
-            )
+            return@launch
         }
+        bookMemoRepository.saveBookMemo(
+            BookMemoEntity(
+                isbn13,
+                memo
+            )
+        )
+        sendEvent(
+            BookDetailEvent.ShowToast(message = "메모가 저장되었습니다.")
+        )
+        setState(
+            BookDetailState.SaveMemo
+        )
     }
 
 }
