@@ -17,6 +17,27 @@ class BookmarkTabViewModel @Inject constructor(
 
     override fun getInitialState(): BookmarkState = BookmarkState.Uninitialized
 
+    init {
+        viewModelScope.launch {
+            bookStoreRepository.observeBookmarkStatus().collect { (isLiked, isbn) ->
+                withState<BookmarkState.Success> { state ->
+                    val updatedList = state.modelList.map { bookModel ->
+                        if (bookModel.isbn13 == isbn) {
+                            bookModel.copy(isLiked = isLiked)
+                        } else {
+                            bookModel
+                        }
+                    }.filter { it.isLiked == true }
+                    setState(
+                        state.copy(
+                            modelList = updatedList
+                        )
+                    )
+                }
+            }
+        }
+    }
+
     override fun fetchData(): Job = viewModelScope.launch {
         setState(
             BookmarkState.Loading

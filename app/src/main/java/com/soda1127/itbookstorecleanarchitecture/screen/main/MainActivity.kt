@@ -41,6 +41,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     bottomNavItems = bottomNavItems,
                     navController = navController,
                     currentDestination = currentDestination,
+                    onTabSelected = { index -> viewModel.onTabSelected(index) }
                 )
             }
         }

@@ -2,11 +2,15 @@ package com.soda1127.itbookstorecleanarchitecture.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.soda1127.itbookstorecleanarchitecture.screen.main.search.SearchScreen
 
-fun NavGraphBuilder.bookSearchGraph(onBookClick: (String, String) -> Unit) {
+fun NavGraphBuilder.bookSearchGraph(
+    onBookClick: (String, String) -> Unit,
+    paddingValues: PaddingValues
+) {
     composable(
         route = Route.Search.route,
         enterTransition = {
@@ -45,5 +49,5 @@ fun NavGraphBuilder.bookSearchGraph(onBookClick: (String, String) -> Unit) {
                 slideOutOfContainer(SlideDirection.Right, tween(300))
             }
         }
-    ) { SearchScreen(onBookClick = onBookClick) }
+    ) { SearchScreen(onBookClick = onBookClick, paddingValues = paddingValues) }
 }

@@ -3,6 +3,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.search
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -47,8 +48,9 @@ import com.soda1127.itbookstorecleanarchitecture.widget.item.SearchHistoryItem
 
 @Composable
 fun SearchScreen(
-        viewModel: SearchTabViewModel = hiltViewModel(),
-        onBookClick: (String, String) -> Unit
+    viewModel: SearchTabViewModel = hiltViewModel(),
+    paddingValues: PaddingValues = PaddingValues(),
+    onBookClick: (String, String) -> Unit
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
@@ -68,59 +70,66 @@ fun SearchScreen(
     }
 
     SearchContent(
-            state = state,
-            searchQuery = searchQuery,
-            onQueryChange = {
-                searchQuery = it
-                if (it.isEmpty()) {
-                    viewModel.fetchData()
-                }
-            },
-            onSearch = {
-                viewModel.searchByKeyword(searchQuery)
-                keyboardController?.hide()
-            },
-            onHistoryClick = {
-                searchQuery = it
-                viewModel.searchByHistory(it)
-                keyboardController?.hide()
-            },
-            onRemoveHistory = { viewModel.removeHistory(it) },
-            onBookClick = onBookClick,
-            onLoadMore = { viewModel.loadMoreSearchResult() },
-            onRetry = { viewModel.handleOnRetry(state = state) },
-            onLikeClick = viewModel::toggleLikeButton
+        state = state,
+        searchQuery = searchQuery,
+        paddingValues = paddingValues,
+        onQueryChange = {
+            searchQuery = it
+            if (it.isEmpty()) {
+                viewModel.fetchData()
+            }
+        },
+        onSearch = {
+            viewModel.searchByKeyword(searchQuery)
+            keyboardController?.hide()
+        },
+        onHistoryClick = {
+            searchQuery = it
+            viewModel.searchByHistory(it)
+            keyboardController?.hide()
+        },
+        onRemoveHistory = { viewModel.removeHistory(it) },
+        onBookClick = onBookClick,
+        onLoadMore = { viewModel.loadMoreSearchResult() },
+        onRetry = { viewModel.handleOnRetry(state = state) },
+        onLikeClick = viewModel::toggleLikeButton
     )
 }
 
 @Composable
 fun SearchContent(
-        state: SearchTabState,
-        searchQuery: String,
-        onQueryChange: (String) -> Unit,
-        onSearch: () -> Unit,
-        onHistoryClick: (String) -> Unit,
-        onRemoveHistory: (String) -> Unit,
-        onBookClick: (String, String) -> Unit,
-        onLoadMore: () -> Unit,
-        onRetry: () -> Unit,
-        onLikeClick: (BookModel) -> Unit
+    paddingValues: PaddingValues,
+    state: SearchTabState,
+    searchQuery: String,
+    onQueryChange: (String) -> Unit,
+    onSearch: () -> Unit,
+    onHistoryClick: (String) -> Unit,
+    onRemoveHistory: (String) -> Unit,
+    onBookClick: (String, String) -> Unit,
+    onLoadMore: () -> Unit,
+    onRetry: () -> Unit,
+    onLikeClick: (BookModel) -> Unit
 ) {
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(paddingValues)
+            .padding(16.dp)
+    ) {
         // Search Bar
         OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onQueryChange,
-                modifier = Modifier.fillMaxWidth(),
-                label = { Text("Search Books") },
-                trailingIcon = {
-                    IconButton(onClick = onSearch) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                keyboardActions = KeyboardActions(onSearch = { onSearch() })
+            value = searchQuery,
+            onValueChange = onQueryChange,
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Search Books") },
+            trailingIcon = {
+                IconButton(onClick = onSearch) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+            },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            keyboardActions = KeyboardActions(onSearch = { onSearch() })
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -130,6 +139,7 @@ fun SearchContent(
                 is SearchTabState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 is SearchTabState.Success.SearchHistory -> {
                     if (state.modelList.isEmpty()) {
                         Text("No Search History", modifier = Modifier.align(Alignment.Center))
@@ -137,26 +147,29 @@ fun SearchContent(
                         LazyColumn {
                             items(state.modelList) { history ->
                                 SearchHistoryItem(
-                                        keyword = history.text,
-                                        onHistoryClick = onHistoryClick,
-                                        onRemoveClick = onRemoveHistory
+                                    keyword = history.text,
+                                    onHistoryClick = onHistoryClick,
+                                    onRemoveClick = onRemoveHistory
                                 )
                             }
                         }
                     }
                 }
+
                 is SearchTabState.Success.SearchResult -> {
                     SearchResultContent(state, onBookClick, onLoadMore, onRetry, onLikeClick)
                 }
+
                 is SearchTabState.Error -> {
                     Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(text = "Error: ${state.e.localizedMessage}")
                         Button(onClick = onRetry) { Text("Retry") }
                     }
                 }
+
                 is SearchTabState.Uninitialized -> {}
             }
         }
@@ -165,11 +178,11 @@ fun SearchContent(
 
 @Composable
 fun BoxScope.SearchResultContent(
-        state: SearchTabState.Success.SearchResult,
-        onBookClick: (String, String) -> Unit,
-        onLoadMore: () -> Unit,
-        onRetry: () -> Unit,
-        onLikeClick: (BookModel) -> Unit
+    state: SearchTabState.Success.SearchResult,
+    onBookClick: (String, String) -> Unit,
+    onLoadMore: () -> Unit,
+    onRetry: () -> Unit,
+    onLikeClick: (BookModel) -> Unit
 ) {
     if (state.modelList.isEmpty()) {
         Text("No Results Found", modifier = Modifier.align(Alignment.Center))
@@ -196,21 +209,27 @@ fun BoxScope.SearchResultContent(
                 when (item) {
                     is BookModel -> {
                         BookItem(
-                                book = item,
-                                onClick = { onBookClick(item.isbn13, item.title) },
-                                onLikeClick = onLikeClick
+                            book = item,
+                            onClick = { onBookClick(item.isbn13, item.title) },
+                            onLikeClick = onLikeClick
                         )
                     }
+
                     is BookLoadingModel -> {
                         Box(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                contentAlignment = Alignment.Center
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            contentAlignment = Alignment.Center
                         ) { CircularProgressIndicator() }
                     }
+
                     is BookLoadRetryModel -> {
                         Column(
-                                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             Text(text = "Error: ${item.errorMessage}")
                             Button(onClick = onRetry) { Text("Retry") }
@@ -227,26 +246,27 @@ fun BoxScope.SearchResultContent(
 fun SearchHistoryPreview() {
     MaterialTheme {
         SearchContent(
-                state =
-                        SearchTabState.Success.SearchHistory(
-                                modelList =
-                                        listOf(
-                                                SearchHistoryModel(
-                                                        id = "1",
-                                                        type = CellType.SEARCH_HISTORY_CELL,
-                                                        text = "Kotlin"
-                                                )
-                                        )
-                        ),
-                searchQuery = "",
-                onQueryChange = {},
-                onSearch = {},
-                onHistoryClick = {},
-                onRemoveHistory = {},
-                onBookClick = { _, _ -> },
-                onLoadMore = {},
-                onRetry = {},
-                onLikeClick = {}
+            paddingValues = PaddingValues(),
+            state =
+                SearchTabState.Success.SearchHistory(
+                    modelList =
+                        listOf(
+                            SearchHistoryModel(
+                                id = "1",
+                                type = CellType.SEARCH_HISTORY_CELL,
+                                text = "Kotlin"
+                            )
+                        )
+                ),
+            searchQuery = "",
+            onQueryChange = {},
+            onSearch = {},
+            onHistoryClick = {},
+            onRemoveHistory = {},
+            onBookClick = { _, _ -> },
+            onLoadMore = {},
+            onRetry = {},
+            onLikeClick = {},
         )
     }
 }
@@ -256,20 +276,21 @@ fun SearchHistoryPreview() {
 fun SearchResultEmptyPreview() {
     MaterialTheme {
         SearchContent(
-                state =
-                        SearchTabState.Success.SearchResult(
-                                modelList = emptyList(),
-                                searchKeyword = "Kotlin"
-                        ),
-                searchQuery = "Kotlin",
-                onQueryChange = {},
-                onSearch = {},
-                onHistoryClick = {},
-                onRemoveHistory = {},
-                onBookClick = { _, _ -> },
-                onLoadMore = {},
-                onRetry = {},
-                onLikeClick = {}
+            paddingValues = PaddingValues(),
+            state =
+                SearchTabState.Success.SearchResult(
+                    modelList = emptyList(),
+                    searchKeyword = "Kotlin"
+                ),
+            searchQuery = "Kotlin",
+            onQueryChange = {},
+            onSearch = {},
+            onHistoryClick = {},
+            onRemoveHistory = {},
+            onBookClick = { _, _ -> },
+            onLoadMore = {},
+            onRetry = {},
+            onLikeClick = {},
         )
     }
 }
@@ -279,32 +300,33 @@ fun SearchResultEmptyPreview() {
 fun SearchResultPreview() {
     MaterialTheme {
         SearchContent(
-                state =
-                        SearchTabState.Success.SearchResult(
-                                modelList =
-                                        (0..10).map {
-                                            BookModel(
-                                                    id = it.toString(),
-                                                    title = "Kotlin Programming $it",
-                                                    subtitle = "Learn Kotlin $it",
-                                                    isbn13 = "1234567890$it",
-                                                    price = "$${10 + it}",
-                                                    image = "",
-                                                    url = "https://example.com/book$it",
-                                                    isLiked = it % 2 == 0
-                                            )
-                                        },
-                                searchKeyword = "Kotlin"
-                        ),
-                searchQuery = "Kotlin",
-                onQueryChange = {},
-                onSearch = {},
-                onHistoryClick = {},
-                onRemoveHistory = {},
-                onBookClick = { _, _ -> },
-                onLoadMore = {},
-                onRetry = {},
-                onLikeClick = {}
+            paddingValues = PaddingValues(),
+            state =
+                SearchTabState.Success.SearchResult(
+                    modelList =
+                        (0..10).map {
+                            BookModel(
+                                id = it.toString(),
+                                title = "Kotlin Programming $it",
+                                subtitle = "Learn Kotlin $it",
+                                isbn13 = "1234567890$it",
+                                price = "$${10 + it}",
+                                image = "",
+                                url = "https://example.com/book$it",
+                                isLiked = it % 2 == 0
+                            )
+                        },
+                    searchKeyword = "Kotlin"
+                ),
+            searchQuery = "Kotlin",
+            onQueryChange = {},
+            onSearch = {},
+            onHistoryClick = {},
+            onRemoveHistory = {},
+            onBookClick = { _, _ -> },
+            onLoadMore = {},
+            onRetry = {},
+            onLikeClick = {},
         )
     }
 }
