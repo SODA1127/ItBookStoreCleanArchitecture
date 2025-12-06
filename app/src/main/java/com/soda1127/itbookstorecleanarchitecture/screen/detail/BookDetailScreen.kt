@@ -56,7 +56,7 @@ fun BookDetailScreen(
     viewModel: BookDetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit
 ) {
-    val state by viewModel.bookDetailStateFlow.collectAsStateWithLifecycle()
+    val state by viewModel.stateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.fetchData()

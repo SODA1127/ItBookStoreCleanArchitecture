@@ -18,14 +18,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.soda1127.itbookstorecleanarchitecture.widget.item.BookmarkItem
+import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
+import com.soda1127.itbookstorecleanarchitecture.widget.item.BookItem
 
 @Composable
 fun BookmarkScreen(
     viewModel: BookmarkTabViewModel = hiltViewModel(),
     onBookClick: (String, String) -> Unit
 ) {
-    val state by viewModel.bookmarkStateFlow.collectAsStateWithLifecycle()
+    val state by viewModel.stateFlow.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         viewModel.fetchData()
@@ -47,7 +48,7 @@ fun BookmarkScreen(
 fun BookmarkContent(
     state: BookmarkState,
     onBookClick: (String, String) -> Unit,
-    onLikeClick: (com.soda1127.itbookstorecleanarchitecture.model.book.BookModel) -> Unit
+    onLikeClick: (BookModel) -> Unit
 ) {
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -65,7 +66,7 @@ fun BookmarkContent(
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(state.modelList) { book ->
-                            BookmarkItem(
+                            BookItem(
                                 book = book,
                                 onClick = { onBookClick(book.isbn13, book.title) },
                                 onLikeClick = { onLikeClick(book) }
@@ -86,7 +87,7 @@ fun BookmarkContentPreview() {
         BookmarkContent(
             state = BookmarkState.Success(
                 modelList = listOf(
-                    com.soda1127.itbookstorecleanarchitecture.model.book.BookModel(
+                    BookModel(
                         id = "1",
                         title = "Bookmarked Book",
                         subtitle = "Subtitle",

@@ -86,7 +86,7 @@ internal class NewTabViewModelTest: JUnit5Test() {
         )
 
         // Then
-        sut.newTabStateFlow.test(TestScope()) {
+        sut.stateFlow.test(TestScope()) {
             assertValues(
                 expectedStateList
             )
@@ -108,7 +108,7 @@ internal class NewTabViewModelTest: JUnit5Test() {
         )
 
         // Then
-        sut.newTabStateFlow.test(TestScope()) {
+        sut.stateFlow.test(TestScope()) {
             assertValues(
                 expectedStateList
             )
@@ -123,7 +123,7 @@ internal class NewTabViewModelTest: JUnit5Test() {
     fun `fetch Book List`(testType: TestType, expectedStateList: List<NewTabState>) = runTest(UnconfinedTestDispatcher()) {
         triageTestCaseBy(testType)
 
-        sut.newTabStateFlow.test(TestScope()) {
+        sut.stateFlow.test(TestScope()) {
             assertValues(
                 expectedStateList
             )

@@ -61,7 +61,7 @@ internal class BookmarkTabViewModelTest : JUnit5Test() {
 
     @Test
     fun `Test data exist in wish list`() = runTest(UnconfinedTestDispatcher()) {
-        sut.bookmarkStateFlow.test(this) {
+        sut.stateFlow.test(this) {
             assertValues(
                 BookmarkState.Uninitialized,
                 BookmarkState.Loading,
@@ -87,7 +87,7 @@ internal class BookmarkTabViewModelTest : JUnit5Test() {
 
     @Test
     fun `Test Book Model toggle like button`() = runTest(UnconfinedTestDispatcher()) {
-        sut.bookmarkStateFlow.test(this) {
+        sut.stateFlow.test(this) {
             assertValues(
                 BookmarkState.Uninitialized,
                 BookmarkState.Loading,

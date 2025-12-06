@@ -45,7 +45,7 @@ internal class SearchTabViewModelTest : JUnit5Test() {
 
     @Test
     fun `Test Search Result`() = runTest(UnconfinedTestDispatcher()) {
-        sut.searchTabStateFlow.test(this) {
+        sut.stateFlow.test(this) {
             searchResultModelList.addAll(
                 firstSearchResult.books.map { book ->
                     BookModel(

@@ -17,10 +17,9 @@ class BookDetailViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
     private val bookMemoRepository: BookMemoRepository,
     private val savedStateHandle: SavedStateHandle
-) : BaseViewModel() {
+) : BaseViewModel<BookDetailState>() {
 
-    private val _bookDetailStateFlow = MutableStateFlow<BookDetailState>(BookDetailState.Uninitialized)
-    val bookDetailStateFlow: StateFlow<BookDetailState> = _bookDetailStateFlow
+    override fun getInitialState(): BookDetailState = BookDetailState.Uninitialized
 
     private val isbn13 by lazy { savedStateHandle.get<String>("isbn13") }
 
@@ -66,21 +65,17 @@ class BookDetailViewModel @Inject constructor(
 
     fun toggleLikeButton() = viewModelScope.launch {
         try {
-            when (val data = bookDetailStateFlow.value) {
-                is BookDetailState.Success -> {
-                    if (data.isLiked) {
-                        bookStoreRepository.removeBookInWishList(data.bookInfoEntity.isbn13)
-                    } else {
-                        bookStoreRepository.addBookInWishList(data.bookInfoEntity.toBookEntity())
-                    }
-                    setState(
-                        data.copy(
-                            isLiked = data.isLiked.not()
-                        )
-                    )
+            withState<BookDetailState.Success> { state ->
+                if (state.isLiked) {
+                    bookStoreRepository.removeBookInWishList(state.bookInfoEntity.isbn13)
+                } else {
+                    bookStoreRepository.addBookInWishList(state.bookInfoEntity.toBookEntity())
                 }
-
-                else -> Unit
+                setState(
+                    state.copy(
+                        isLiked = state.isLiked.not()
+                    )
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -106,10 +101,6 @@ class BookDetailViewModel @Inject constructor(
                 BookDetailState.SaveMemo
             )
         }
-    }
-
-    private fun setState(state: BookDetailState) {
-        _bookDetailStateFlow.value = state
     }
 
 }
