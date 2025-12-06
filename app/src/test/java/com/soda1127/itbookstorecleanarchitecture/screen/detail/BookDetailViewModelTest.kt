@@ -2,6 +2,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.detail
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.gson.Gson
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiService
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.json.BookInfoResponseJson
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.Test
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-internal class BookDetailViewModelTest: JUnit5Test() {
+internal class BookDetailViewModelTest : JUnit5Test() {
 
     private lateinit var sut: BookDetailViewModel
 
@@ -37,17 +38,22 @@ internal class BookDetailViewModelTest: JUnit5Test() {
     private lateinit var bookMemoRepository: BookMemoRepository
 
     @MockK
+    private lateinit var geminiService: GeminiService
+
+    @MockK
     private lateinit var savedStateHandle: SavedStateHandle
 
     private val testMemoText = "testMemoText"
     private val testBookEntity = Gson().fromJson(BookInfoResponseJson, BookInfoResponse::class.java).toEntity()
+    private val bookSummaryText = "Sample book summary text."
+    private val ratingSummaryText = "Sample rating summary text."
 
     @BeforeEach
     override fun setup() {
         super.setup()
         bookStoreRepository = TestBookStoreRepository()
         every { savedStateHandle.get<String>(KEY_ISBN13) } returns TestBookStoreRepository.TEST_ISBN13
-        sut = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
+        sut = BookDetailViewModel(bookStoreRepository, bookMemoRepository, geminiService, savedStateHandle)
     }
 
     @BeforeEach
@@ -87,17 +93,45 @@ internal class BookDetailViewModelTest: JUnit5Test() {
         } returns Unit
     }
 
+    private fun generateGeneratingSummaryState() = BookDetailState.Success.SummaryState(
+        isSummaryGenerating = true,
+        isRatingSummaryGenerating = true
+    )
+
+    private fun mockGeminiService() {
+        coEvery {
+            delay(50)
+            geminiService.generateBookSummary(any(), any())
+        } returns bookSummaryText
+        coEvery {
+            delay(50)
+            geminiService.generateRatingSummaryStr(any())
+        } returns ratingSummaryText
+    }
+
     @Test
     fun `Test Fetch Data`() = runTest(UnconfinedTestDispatcher()) {
         setupMockBookMemoRepositoryReturnsNull()
+        mockGeminiService()
+        val successState = BookDetailState.Success(
+            testBookEntity,
+            true,
+            "",
+            generateGeneratingSummaryState()
+        )
+
         sut.bookDetailStateFlow.test(this) {
             assertValues(
                 BookDetailState.Uninitialized,
                 BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
+                successState,
+                successState.copy(
+                    summaryState = successState.summaryState.copy(
+                        bookSummary = "[내용요약]\n${bookSummaryText}",
+                        isSummaryGenerating = false,
+                        ratingSummary = "[평점요약]\n${ratingSummaryText}",
+                        isRatingSummaryGenerating = false,
+                    )
                 )
             )
         }
@@ -107,56 +141,91 @@ internal class BookDetailViewModelTest: JUnit5Test() {
     @Test
     fun `Test Toggle Bookmark`() = runTest(UnconfinedTestDispatcher()) {
         setupMockBookMemoRepositoryReturnsNull()
+        mockGeminiService()
+        val successState = BookDetailState.Success(
+            testBookEntity,
+            true,
+            "",
+            generateGeneratingSummaryState()
+        )
+        val summaryStateWithGenerated = successState.copy(
+            summaryState = successState.summaryState.copy(
+                bookSummary = "[내용요약]\n${bookSummaryText}",
+                isSummaryGenerating = false,
+                ratingSummary = "[평점요약]\n${ratingSummaryText}",
+                isRatingSummaryGenerating = false,
+            )
+        )
         sut.bookDetailStateFlow.test(this) {
             assertValues(
                 BookDetailState.Uninitialized,
                 BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
-                ),
-                BookDetailState.Success(
-                    testBookEntity,
-                    false,
-                    ""
+                successState,
+                summaryStateWithGenerated,
+                summaryStateWithGenerated.copy(
+                    isLiked = false
                 )
             )
         }
         sut.fetchData()
-        delay(100)
+        delay(500)
         sut.toggleLikeButton()
     }
 
     @Test
     fun `Test Save Memo`() = runTest(UnconfinedTestDispatcher()) {
         setupMockBookMemoRepositoryReturnsNull()
+        mockGeminiService()
+        setupMockBookMemoRepositorySavedMemo()
+
+        val successState = BookDetailState.Success(
+            testBookEntity,
+            true,
+            "",
+            generateGeneratingSummaryState()
+        )
+        val summaryStateWithGenerated = successState.copy(
+            summaryState = successState.summaryState.copy(
+                bookSummary = "[내용요약]\n${bookSummaryText}",
+                isSummaryGenerating = false,
+                ratingSummary = "[평점요약]\n${ratingSummaryText}",
+                isRatingSummaryGenerating = false,
+            )
+        )
+
+        val successSavedState = BookDetailState.Success(
+            testBookEntity,
+            true,
+            testMemoText,
+            generateGeneratingSummaryState()
+        )
+        val summarySavedStateWithGenerated = successSavedState.copy(
+            summaryState = successState.summaryState.copy(
+                bookSummary = "[내용요약]\n${bookSummaryText}",
+                isSummaryGenerating = false,
+                ratingSummary = "[평점요약]\n${ratingSummaryText}",
+                isRatingSummaryGenerating = false,
+            )
+        )
         sut.bookDetailStateFlow.test(this) {
             assertValues(
                 BookDetailState.Uninitialized,
                 BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
-                ),
+                successState,
+                summaryStateWithGenerated,
                 BookDetailState.SaveMemo,
                 BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    testMemoText
-                )
+                successSavedState,
+                summarySavedStateWithGenerated
             )
         }
         sut.fetchData()
-        delay(100)
+        delay(300)
 
-        setupMockBookMemoRepositorySavedMemo()
         sut.saveMemo(testMemoText)
 
         setupMockBookMemoRepositoryReturnsSavedMemo()
-        delay(100)
+        delay(300)
         sut.fetchData()
     }
 
