@@ -1,7 +1,8 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.chat
 
 import androidx.lifecycle.viewModelScope
-import com.soda1127.itbookstorecleanarchitecture.data.remote.GeminiService
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiService
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiServiceImpl
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel

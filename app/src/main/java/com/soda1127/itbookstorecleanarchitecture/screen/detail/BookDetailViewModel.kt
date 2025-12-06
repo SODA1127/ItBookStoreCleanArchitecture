@@ -3,10 +3,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.detail
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
-import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiService
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
@@ -26,6 +23,7 @@ import kotlin.coroutines.cancellation.CancellationException
 class BookDetailViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
     private val bookMemoRepository: BookMemoRepository,
+    private val geminiService: GeminiService,
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
@@ -33,11 +31,6 @@ class BookDetailViewModel @Inject constructor(
     val bookDetailStateFlow: StateFlow<BookDetailState> = _bookDetailStateFlow
 
     private val isbn13 by lazy { savedStateHandle.get<String>(KEY_ISBN13) }
-
-    private val generativeModel by lazy {
-        Firebase.ai(backend = GenerativeBackend.googleAI())
-            .generativeModel("gemini-2.5-flash")
-    }
 
     override fun fetchData(): Job = viewModelScope.launch {
         setState(BookDetailState.Loading)
@@ -62,34 +55,32 @@ class BookDetailViewModel @Inject constructor(
             setState(successState)
 
             launch {
-                generateSummary(initialBookInfo).map { it.text }.collect { summaryText ->
-                    (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
-                        val summaryState = currentState.summaryState
-                        setState(
-                            currentState.copy(
-                                summaryState = summaryState.copy(
-                                    bookSummary = summaryState.bookSummary.orEmpty().ifEmpty { "[내용요약]\n" } + summaryText.orEmpty(),
-                                    isSummaryGenerating = false
-                                )
+                val summaryText = geminiService.generateBookSummary(initialBookInfo.title, initialBookInfo.url)
+                (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
+                    val summaryState = currentState.summaryState
+                    setState(
+                        currentState.copy(
+                            summaryState = summaryState.copy(
+                                bookSummary = summaryState.bookSummary.orEmpty().ifEmpty { "[내용요약]\n" } + summaryText.orEmpty(),
+                                isSummaryGenerating = false
                             )
                         )
-                    }
+                    )
                 }
             }
 
             launch {
-                generateRatingSummary(initialBookInfo).map { it.text }.collect { ratingSummaryText ->
-                    (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
-                        val summaryState = currentState.summaryState
-                        setState(
-                            currentState.copy(
-                                summaryState = summaryState.copy(
-                                    ratingSummary = summaryState.ratingSummary.orEmpty().ifEmpty { "[평점요약]\n" } + ratingSummaryText.orEmpty(),
-                                    isRatingSummaryGenerating = false
-                                )
+                val ratingSummaryText = geminiService.generateRatingSummaryStr(initialBookInfo)
+                (bookDetailStateFlow.value as? BookDetailState.Success)?.let { currentState ->
+                    val summaryState = currentState.summaryState
+                    setState(
+                        currentState.copy(
+                            summaryState = summaryState.copy(
+                                ratingSummary = summaryState.ratingSummary.orEmpty().ifEmpty { "[평점요약]\n" } + ratingSummaryText.orEmpty(),
+                                isRatingSummaryGenerating = false
                             )
                         )
-                    }
+                    )
                 }
             }
 
@@ -133,24 +124,6 @@ class BookDetailViewModel @Inject constructor(
             }
         }
     }
-
-    private fun generateSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
-        """
-        Describe this book by this information : ${bookInfoEntity.title} ${bookInfoEntity.subtitle} ${bookInfoEntity.desc}
-        and this is the url to analyze this book's information : ${bookInfoEntity.url}
-        Please summarize in about 1000 characters.
-        And it should be written by korean.
-        """.trimIndent()
-    )
-
-    private fun generateRatingSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
-        """
-        [Goal] Please summarize the book's rating by analyzing the following information: ${bookInfoEntity.title}
-        Additional info : and you can search the book in the Amazon site through this url : ${bookInfoEntity.url}
-        Please summarize in about 300 characters.
-        And it should be written by korean.
-        """.trimIndent()
-    )
 
     fun toggleLikeButton() = viewModelScope.launch {
         try {

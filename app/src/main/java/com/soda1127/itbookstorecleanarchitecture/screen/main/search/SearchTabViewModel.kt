@@ -1,16 +1,13 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.search
 
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Firebase
-import com.google.firebase.ai.ai
-import com.google.firebase.ai.type.GenerativeBackend
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiService
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadRetryModel
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadingModel
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
 import com.soda1127.itbookstorecleanarchitecture.data.entity.SearchHistoryEntity
-import com.soda1127.itbookstorecleanarchitecture.data.remote.GeminiService
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookSearchRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel

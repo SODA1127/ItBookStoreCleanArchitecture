@@ -1,21 +1,25 @@
-package com.soda1127.itbookstorecleanarchitecture.data.remote
+package com.soda1127.itbookstorecleanarchitecture.data.ai
 
 import com.google.firebase.Firebase
 import com.google.firebase.ai.ai
 import com.google.firebase.ai.type.GenerativeBackend
+import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class GeminiService @Inject constructor() {
+class GeminiServiceImpl @Inject constructor(
+
+): GeminiService {
 
     private val generativeModel = Firebase.ai(backend = GenerativeBackend.googleAI())
         .generativeModel("gemini-2.5-flash")
+
     private var chat = generativeModel.startChat()
 
-    suspend fun sendMessage(message: String): String = withContext(Dispatchers.IO) {
+    override suspend fun sendMessage(message: String): String = withContext(Dispatchers.IO) {
         try {
             // Firebase AI Logic SDK를 사용하여 채팅 메시지 전송
             val response = chat.sendMessage(message)
@@ -25,12 +29,39 @@ class GeminiService @Inject constructor() {
         }
     }
 
-    fun clearHistory() {
+    override fun clearHistory() {
         // 새로운 채팅 세션 시작
         chat = generativeModel.startChat()
     }
 
-    suspend fun extractBookKeyword(userMessage: String): String = withContext(Dispatchers.IO) {
+    override fun generateSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
+        """
+        Describe this book by this information : ${bookInfoEntity.title} ${bookInfoEntity.subtitle} ${bookInfoEntity.desc}
+        and this is the url to analyze this book's information : ${bookInfoEntity.url}
+        Please summarize in about 1000 characters.
+        And it should be written by korean.
+        """.trimIndent()
+    )
+
+    override fun generateRatingSummary(bookInfoEntity: BookInfoEntity) = generativeModel.generateContentStream(
+        """
+        [Goal] Please summarize the book's rating by analyzing the following information: ${bookInfoEntity.title}
+        Additional info : and you can search the book in the Amazon site through this url : ${bookInfoEntity.url}
+        Please summarize in about 300 characters.
+        And it should be written by korean.
+        """.trimIndent()
+    )
+
+    override suspend fun generateRatingSummaryStr(bookInfoEntity: BookInfoEntity): String = generativeModel.generateContent(
+        """
+        [Goal] Please summarize the book's rating by analyzing the following information: ${bookInfoEntity.title}
+        Additional info : and you can search the book in the Amazon site through this url : ${bookInfoEntity.url}
+        Please summarize in about 300 characters.
+        And it should be written by korean.
+        """.trimIndent()
+    ).text.orEmpty()
+
+    override suspend fun extractBookKeyword(userMessage: String): String = withContext(Dispatchers.IO) {
         try {
             val prompt = "사용자가 IT 도서를 추천받고 싶어합니다. 다음 메시지에서 IT 도서 검색에 적합한 영어 키워드 하나만 추출해주세요. 추가 설명 없이 영어 한단어만 반환하세요: $userMessage"
             val response = generativeModel.generateContent(prompt)
@@ -40,7 +71,7 @@ class GeminiService @Inject constructor() {
         }
     }
 
-    suspend fun generateBookSummary(bookTitle: String, bookUrl: String): String = withContext(Dispatchers.IO) {
+    override suspend fun generateBookSummary(bookTitle: String, bookUrl: String): String = withContext(Dispatchers.IO) {
         try {
             val prompt = """
                 다음 IT 도서에 대한 간단한 요약을 한국어로 작성해주세요:
@@ -61,7 +92,7 @@ class GeminiService @Inject constructor() {
         }
     }
 
-    suspend fun checkUserWantToFindTheITBooks(userMessage: String): Boolean = withContext(Dispatchers.IO) {
+    override suspend fun checkUserWantToFindTheITBooks(userMessage: String): Boolean = withContext(Dispatchers.IO) {
         try {
             val prompt = """
                 사용자의 메세지 ${userMessage}를 분석해주세요.

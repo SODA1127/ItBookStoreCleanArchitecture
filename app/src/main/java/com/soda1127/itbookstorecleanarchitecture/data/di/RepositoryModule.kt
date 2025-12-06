@@ -1,5 +1,7 @@
 package com.soda1127.itbookstorecleanarchitecture.data.di
 
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiService
+import com.soda1127.itbookstorecleanarchitecture.data.ai.GeminiServiceImpl
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.DefaultBookMemoRepository
@@ -34,6 +36,10 @@ abstract class RepositoryModule {
         defaultBookMemoRepository: DefaultBookMemoRepository
     ): BookMemoRepository
 
-
+    @Binds
+    @Singleton
+    abstract fun bindGeminiService(
+        geminiServiceImpl: GeminiServiceImpl
+    ): GeminiService
 
 }
