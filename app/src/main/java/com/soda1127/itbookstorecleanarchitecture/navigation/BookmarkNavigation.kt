@@ -3,13 +3,15 @@ package com.soda1127.itbookstorecleanarchitecture.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.soda1127.itbookstorecleanarchitecture.screen.main.bookmark.BookmarkScreen
 
 fun NavGraphBuilder.bookmarkGraph(
     onBookClick: (String, String) -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    listState: LazyListState
 ) {
     composable(
         route = Route.Bookmark.route,
@@ -49,5 +51,11 @@ fun NavGraphBuilder.bookmarkGraph(
                 slideOutOfContainer(SlideDirection.Right, tween(300))
             }
         }
-    ) { BookmarkScreen(onBookClick = onBookClick, paddingValues = paddingValues) }
+    ) {
+        BookmarkScreen(
+            paddingValues = paddingValues,
+            onBookClick = onBookClick,
+            listState = listState
+        )
+    }
 }

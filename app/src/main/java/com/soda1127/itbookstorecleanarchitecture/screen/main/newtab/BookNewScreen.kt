@@ -3,8 +3,8 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -25,7 +25,8 @@ import com.soda1127.itbookstorecleanarchitecture.widget.item.BookItem
 fun BookNewScreen(
     viewModel: BookNewTabViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(),
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
+    listState: LazyListState
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
 
@@ -39,7 +40,8 @@ fun BookNewScreen(
         state = state,
         paddingValues = paddingValues,
         onBookClick = onBookClick,
-        onLikeClick = viewModel::toggleLikeButton
+        onLikeClick = viewModel::toggleLikeButton,
+        listState = listState
     )
 }
 
@@ -48,7 +50,8 @@ fun BookNewContent(
     state: NewTabState,
     paddingValues: PaddingValues,
     onBookClick: (String, String) -> Unit,
-    onLikeClick: (BookModel) -> Unit
+    onLikeClick: (BookModel) -> Unit,
+    listState: LazyListState
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (state) {
@@ -58,6 +61,7 @@ fun BookNewContent(
 
             is NewTabState.Success -> {
                 LazyColumn(
+                    state = listState,
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(
                         top = paddingValues.calculateTopPadding() + 8.dp,
@@ -106,9 +110,10 @@ fun BookNewContentPreview() {
                             )
                         )
                 ),
+            paddingValues = PaddingValues(),
             onBookClick = { _, _ -> },
             onLikeClick = {},
-            paddingValues = PaddingValues()
+            listState = LazyListState(0, 0)
         )
     }
 }

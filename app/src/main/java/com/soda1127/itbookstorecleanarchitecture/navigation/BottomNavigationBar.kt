@@ -26,6 +26,7 @@ fun BottomNavigationBar(
     navController: NavHostController,
     currentDestination: NavDestination?,
     onTabSelected: (Int) -> Unit,
+    onScrollToTop: () -> Unit,
 ) {
     NavigationBar {
         bottomNavItems.forEachIndexed { index, item ->
@@ -37,6 +38,9 @@ fun BottomNavigationBar(
                 navController = navController,
                 onTabSelected = {
                     onTabSelected(index)
+                },
+                onScrollToTop = {
+                    onScrollToTop()
                 }
             )
         }
@@ -49,6 +53,7 @@ fun RowScope.NavigationTabItem(
     item: BottomNavItem,
     navController: NavHostController,
     onTabSelected: () -> Unit,
+    onScrollToTop: () -> Unit,
 ) {
     NavigationBarItem(
         icon = {
@@ -68,6 +73,8 @@ fun RowScope.NavigationTabItem(
                     restoreState = true
                 }
                 onTabSelected()
+            } else {
+                onScrollToTop()
             }
         }
     )
@@ -82,6 +89,7 @@ fun BottomNavigationBarPreview() {
         navController = rememberNavController(), // Keep navController for navigation logic in preview
         currentDestination = null, // Set currentDestination to null for a generic preview without selection
         onTabSelected = {},
+        onScrollToTop = {},
     )
 }
 
@@ -95,6 +103,7 @@ fun BottomNavigationBarItemPreview() {
             item = bottomNavItem,
             navController = rememberNavController(), // Keep navController for navigation logic in
             onTabSelected = {},
+            onScrollToTop = {}
         )
     }
 }

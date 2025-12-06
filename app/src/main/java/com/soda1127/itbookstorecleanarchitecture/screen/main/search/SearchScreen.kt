@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -49,7 +49,8 @@ import com.soda1127.itbookstorecleanarchitecture.widget.item.SearchHistoryItem
 fun SearchScreen(
     viewModel: SearchTabViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(),
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
+    listState: LazyListState
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -69,6 +70,7 @@ fun SearchScreen(
     }
 
     SearchContent(
+        listState = listState,
         state = state,
         searchQuery = searchQuery,
         paddingValues = paddingValues,
@@ -97,6 +99,7 @@ fun SearchScreen(
 
 @Composable
 fun SearchContent(
+    listState: LazyListState,
     paddingValues: PaddingValues,
     state: SearchTabState,
     searchQuery: String,
@@ -107,7 +110,7 @@ fun SearchContent(
     onBookClick: (String, String) -> Unit,
     onLoadMore: () -> Unit,
     onRetry: () -> Unit,
-    onLikeClick: (BookModel) -> Unit
+    onLikeClick: (BookModel) -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -162,7 +165,14 @@ fun SearchContent(
                 }
 
                 is SearchTabState.Success.SearchResult -> {
-                    SearchResultContent(state, onBookClick, onLoadMore, onRetry, onLikeClick)
+                    SearchResultContent(
+                        listState = listState,
+                        state = state,
+                        onBookClick = onBookClick,
+                        onLoadMore = onLoadMore,
+                        onRetry = onRetry,
+                        onLikeClick = onLikeClick
+                    )
                 }
 
                 is SearchTabState.Error -> {
@@ -183,6 +193,7 @@ fun SearchContent(
 
 @Composable
 fun BoxScope.SearchResultContent(
+    listState: LazyListState,
     state: SearchTabState.Success.SearchResult,
     onBookClick: (String, String) -> Unit,
     onLoadMore: () -> Unit,
@@ -192,7 +203,6 @@ fun BoxScope.SearchResultContent(
     if (state.modelList.isEmpty()) {
         Text("No Results Found", modifier = Modifier.align(Alignment.Center))
     } else {
-        val listState = rememberLazyListState()
         // Pagination logic
         val isAtBottom by remember {
             derivedStateOf {
@@ -255,6 +265,7 @@ fun BoxScope.SearchResultContent(
 fun SearchHistoryPreview() {
     MaterialTheme {
         SearchContent(
+            listState = LazyListState(0, 0),
             paddingValues = PaddingValues(),
             state =
                 SearchTabState.Success.SearchHistory(
@@ -285,6 +296,7 @@ fun SearchHistoryPreview() {
 fun SearchResultEmptyPreview() {
     MaterialTheme {
         SearchContent(
+            listState = LazyListState(0, 0),
             paddingValues = PaddingValues(),
             state =
                 SearchTabState.Success.SearchResult(
@@ -309,6 +321,7 @@ fun SearchResultEmptyPreview() {
 fun SearchResultPreview() {
     MaterialTheme {
         SearchContent(
+            listState = LazyListState(0, 0),
             paddingValues = PaddingValues(),
             state =
                 SearchTabState.Success.SearchResult(

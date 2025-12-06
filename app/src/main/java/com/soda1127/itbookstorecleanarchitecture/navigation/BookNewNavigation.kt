@@ -3,13 +3,15 @@ package com.soda1127.itbookstorecleanarchitecture.navigation
 import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.soda1127.itbookstorecleanarchitecture.screen.main.newtab.BookNewScreen
 
 fun NavGraphBuilder.bookNewGraph(
     onBookClick: (String, String) -> Unit,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    listState: LazyListState
 ) {
     composable(
         route = Route.New.route,
@@ -49,5 +51,11 @@ fun NavGraphBuilder.bookNewGraph(
                 slideOutOfContainer(SlideDirection.Right, tween(300))
             }
         }
-    ) { BookNewScreen(onBookClick = onBookClick, paddingValues = paddingValues) }
+    ) {
+        BookNewScreen(
+            paddingValues = paddingValues,
+            onBookClick = onBookClick,
+            listState = listState,
+        )
+    }
 }

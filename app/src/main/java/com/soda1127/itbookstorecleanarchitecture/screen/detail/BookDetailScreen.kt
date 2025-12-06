@@ -25,8 +25,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -56,26 +54,20 @@ import kotlin.reflect.KProperty
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookDetailScreen(
-    isbn13: String,
-    title: String,
     viewModel: BookDetailViewModel = hiltViewModel(),
     onBackClick: () -> Unit,
-    snackState: SnackbarHostState
+    onShowSnackbar: (String) -> Unit
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
     val event = viewModel.eventFlow.collectAsState(initial = null).value
+    var title by remember { mutableStateOf("") }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchData()
-    }
+    LaunchedEffect(Unit) { viewModel.fetchData() }
 
     LaunchedEffect(event) {
         when (val event = event) {
             is BookDetailEvent.ShowToast -> {
-                snackState.showSnackbar(
-                    message = event.message,
-                    duration = SnackbarDuration.Short
-                )
+                onShowSnackbar(event.message)
             }
 
             else -> {}
@@ -97,32 +89,43 @@ fun BookDetailScreen(
             TopAppBar(
                 title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        // We need to save memo before back?
-                        // Activity logic: onBackPressed saves memo.
-                        // We can simulate this.
-                        // But here onBackClick just pops.
-                        // We should expose save method and call it.
-                        // For navigation icon, usually just back.
-                        // But requirement: "saveMemo(binding.bookMemoInput.text.toString()) then finish()"
-                        // Implementation below handles this in BackHandler or explicit call.
-                        onBackClick()
-                    }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(
+                        onClick = {
+                            // We need to save memo before back?
+                            // Activity logic: onBackPressed saves memo.
+                            // We can simulate this.
+                            // But here onBackClick just pops.
+                            // We should expose save method and call it.
+                            // For navigation icon, usually just back.
+                            // But requirement:
+                            // "saveMemo(binding.bookMemoInput.text.toString()) then
+                            // finish()"
+                            // Implementation below handles this in BackHandler or
+                            // explicit call.
+                            onBackClick()
+                        }
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier
-            .padding(innerPadding)
-            .fillMaxSize()) {
+        Box(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+        ) {
             when (val currentState = state) {
                 is BookDetailState.Loading -> {
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
 
                 is BookDetailState.Success -> {
+                    title = currentState.bookInfoEntity.title
                     BookDetailContent(
                         state = currentState,
                         onLikeClick = { viewModel.toggleLikeButton() },
@@ -131,11 +134,12 @@ fun BookDetailScreen(
                 }
 
                 is BookDetailState.Error -> {
-                    Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         Text("Error occurred")
-                        Button(onClick = { viewModel.fetchData() }) {
-                            Text("Retry")
-                        }
+                        Button(onClick = { viewModel.fetchData() }) { Text("Retry") }
                     }
                 }
 
@@ -161,10 +165,9 @@ fun BookDetailContent(
             .padding(16.dp)
     ) {
         Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .wrapContentSize()
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentSize()
         ) {
             AsyncImage(
                 model = state.bookInfoEntity.image,
@@ -178,15 +181,13 @@ fun BookDetailContent(
             Spacer(modifier = Modifier.size(16.dp))
 
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .heightIn(min = 120.dp)
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min)
+                        .heightIn(min = 120.dp)
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
+                Column(modifier = Modifier.fillMaxSize()) {
                     Text(
                         text = state.bookInfoEntity.title,
                         style = MaterialTheme.typography.titleLarge
@@ -202,9 +203,7 @@ fun BookDetailContent(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Box(
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
                         Text(
                             modifier = Modifier.align(Alignment.CenterStart),
                             text = state.bookInfoEntity.price,
@@ -216,9 +215,9 @@ fun BookDetailContent(
                             onClick = onLikeClick,
                             modifier = Modifier.align(Alignment.CenterEnd)
                         ) {
-
-
-                            val iconRes = if (state.isLiked) R.drawable.ic_heart_enable else R.drawable.ic_heart_disable
+                            val iconRes =
+                                if (state.isLiked) R.drawable.ic_heart_enable
+                                else R.drawable.ic_heart_disable
                             val tint = if (state.isLiked) Color.Red else Color.Gray
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = iconRes),
@@ -247,27 +246,26 @@ fun BookDetailContent(
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 8.dp)
-        ) {
-            Text("Save & Exit")
-        }
+        ) { Text("Save & Exit") }
 
         Spacer(modifier = Modifier.height(24.dp))
 
         // Info Text reflection
-        val infoText = remember(state.bookInfoEntity) {
-            var text = ""
-            BookInfoEntity::class.members.forEach { property ->
-                if (property is KProperty<*>) {
-                    try {
-                        val value = property.call(state.bookInfoEntity)
-                        text += "[${property.name}] : ${value}\n\n"
-                    } catch (e: Exception) {
-                        // Ignore
+        val infoText =
+            remember(state.bookInfoEntity) {
+                var text = ""
+                BookInfoEntity::class.members.forEach { property ->
+                    if (property is KProperty<*>) {
+                        try {
+                            val value = property.call(state.bookInfoEntity)
+                            text += "[${property.name}] : ${value}\n\n"
+                        } catch (e: Exception) {
+                            // Ignore
+                        }
                     }
                 }
+                text
             }
-            text
-        }
 
         Text(text = infoText, style = MaterialTheme.typography.bodySmall)
     }
@@ -279,23 +277,24 @@ fun BookDetailContentPreview() {
     MaterialTheme {
         BookDetailContent(
             state = BookDetailState.Success(
-                bookInfoEntity = BookInfoEntity(
-                    title = "Preview Title",
-                    subtitle = "Preview Subtitle",
-                    price = "$10.00",
-                    image = "",
-                    isbn13 = "1234567890123",
-                    desc = "Description",
-                    isbn10 = "1234567890",
-                    pages = 100,
-                    year = 2024,
-                    rating = 4.5f,
-                    url = "url",
-                    authors = "Author",
-                    language = "English",
-                    publisher = "Publisher",
-                    pdf = null
-                ),
+                bookInfoEntity =
+                    BookInfoEntity(
+                        title = "Preview Title",
+                        subtitle = "Preview Subtitle",
+                        price = "$10.00",
+                        image = "",
+                        isbn13 = "1234567890123",
+                        desc = "Description",
+                        isbn10 = "1234567890",
+                        pages = 100,
+                        year = 2024,
+                        rating = 4.5f,
+                        url = "url",
+                        authors = "Author",
+                        language = "English",
+                        publisher = "Publisher",
+                        pdf = null
+                    ),
                 memo = "My Memo",
                 isLiked = true
             ),

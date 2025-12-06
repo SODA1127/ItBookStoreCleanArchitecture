@@ -4,12 +4,14 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,6 +22,7 @@ import com.soda1127.itbookstorecleanarchitecture.navigation.MainNavHost
 import com.soda1127.itbookstorecleanarchitecture.screen.util.CustomSnackBarView
 import com.soda1127.itbookstorecleanarchitecture.ui.theme.ItBookStoreTheme
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -36,6 +39,10 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     // State from ViewModel
     val bottomNavItems = viewModel.bottomNavItems
 
+    val listState = rememberLazyListState()
+
+    val coroutineScope = rememberCoroutineScope()
+
     Scaffold(
         bottomBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -49,7 +56,12 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     bottomNavItems = bottomNavItems,
                     navController = navController,
                     currentDestination = currentDestination,
-                    onTabSelected = { index -> viewModel.onTabSelected(index) }
+                    onTabSelected = { index -> viewModel.onTabSelected(index) },
+                    onScrollToTop = {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(0)
+                        }
+                    }
                 )
             }
         },
@@ -66,7 +78,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         MainNavHost(
             navController = navController,
             innerPadding = innerPadding,
-            snackState = snackState
+            snackState = snackState,
+            listState = listState,
         )
     }
 }

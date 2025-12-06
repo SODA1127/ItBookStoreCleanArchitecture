@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -26,7 +27,8 @@ import com.soda1127.itbookstorecleanarchitecture.widget.item.BookItem
 fun BookmarkScreen(
     viewModel: BookmarkTabViewModel = hiltViewModel(),
     paddingValues: PaddingValues = PaddingValues(),
-    onBookClick: (String, String) -> Unit
+    onBookClick: (String, String) -> Unit,
+    listState: LazyListState,
 ) {
     val state by viewModel.stateFlow.collectAsStateWithLifecycle()
 
@@ -46,7 +48,8 @@ fun BookmarkScreen(
         state = state,
         paddingValues = paddingValues,
         onBookClick = onBookClick,
-        onLikeClick = { viewModel.toggleLikeButton(it) }
+        onLikeClick = { viewModel.toggleLikeButton(it) },
+        listState = listState,
     )
 }
 
@@ -55,7 +58,8 @@ fun BookmarkContent(
     state: BookmarkState,
     paddingValues: PaddingValues,
     onBookClick: (String, String) -> Unit,
-    onLikeClick: (BookModel) -> Unit
+    onLikeClick: (BookModel) -> Unit,
+    listState: LazyListState
 ) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         when (state) {
@@ -71,6 +75,7 @@ fun BookmarkContent(
                     ) { Text(text = "No Bookmarks", modifier = Modifier.padding(16.dp)) }
                 } else {
                     LazyColumn(
+                        state = listState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(
                             top = paddingValues.calculateTopPadding() + 8.dp,
@@ -98,6 +103,7 @@ fun BookmarkContent(
 fun BookmarkContentPreview() {
     MaterialTheme {
         BookmarkContent(
+            listState = LazyListState(0, 0),
             state =
                 BookmarkState.Success(
                     modelList =
@@ -113,9 +119,9 @@ fun BookmarkContentPreview() {
                             )
                         )
                 ),
+            paddingValues = PaddingValues(),
             onBookClick = { _, _ -> },
             onLikeClick = {},
-            paddingValues = PaddingValues()
         )
     }
 }
