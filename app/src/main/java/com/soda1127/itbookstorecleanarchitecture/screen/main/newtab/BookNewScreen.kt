@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.soda1127.itbookstorecleanarchitecture.widget.item.BookItem
@@ -67,7 +68,7 @@ fun BookNewContent(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview
 @Composable
 fun BookNewContentPreview() {
     MaterialTheme {
@@ -80,7 +81,7 @@ fun BookNewContentPreview() {
                         subtitle = "Subtitle",
                         isbn13 = "123",
                         price = "$10",
-                        image = "",
+                        image = "https://itbook.store/img/books/9781484239063.png",
                         url = ""
                     )
                 )

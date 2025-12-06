@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.MaterialTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookLoadRetryModel
@@ -223,8 +224,8 @@ fun SearchContentPreview() {
         SearchContent(
             state = SearchTabState.Success.SearchHistory(
                 modelList = listOf(
-                    com.soda1127.itbookstorecleanarchitecture.widget.item.SearchHistoryItemModel(
-                         id = "1", type = com.soda1127.itbookstorecleanarchitecture.model.CellType.HISTORY, text = "Kotlin"
+                    com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel(
+                         id = "1", type = com.soda1127.itbookstorecleanarchitecture.model.CellType.SEARCH_HISTORY_CELL, text = "Kotlin"
                     )
                 )
             ),
