@@ -3,6 +3,7 @@ package com.soda1127.itbookstorecleanarchitecture.screen.main.bookmark
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -82,12 +83,14 @@ fun BookmarkContent(
                             bottom = paddingValues.calculateBottomPadding() + 8.dp
                         )
                     ) {
-                        items(state.modelList) { book ->
-                            BookItem(
-                                book = book,
-                                onClick = { onBookClick(book.isbn13, book.title) },
-                                onLikeClick = { onLikeClick(book) }
-                            )
+                        items(state.modelList, key = { it.isbn13 }) { book ->
+                            Row(modifier = Modifier.animateItem()) {
+                                BookItem(
+                                    book = book,
+                                    onClick = { onBookClick(book.isbn13, book.title) },
+                                    onLikeClick = { onLikeClick(book) }
+                                )
+                            }
                         }
                     }
                 }

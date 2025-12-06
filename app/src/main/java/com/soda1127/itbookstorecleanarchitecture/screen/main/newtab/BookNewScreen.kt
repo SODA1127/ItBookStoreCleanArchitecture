@@ -68,7 +68,7 @@ fun BookNewContent(
                         bottom = paddingValues.calculateBottomPadding() + 8.dp,
                     )
                 ) {
-                    items(state.modelList) { book ->
+                    items(state.modelList, key = { it.isbn13 }) { book ->
                         BookItem(
                             book = book,
                             onClick = { onBookClick(book.isbn13, book.title) },

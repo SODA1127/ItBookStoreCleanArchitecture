@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -153,12 +155,14 @@ fun SearchContent(
                         Text("No Search History", modifier = Modifier.align(Alignment.Center))
                     } else {
                         LazyColumn {
-                            items(state.modelList) { history ->
-                                SearchHistoryItem(
-                                    keyword = history.text,
-                                    onHistoryClick = onHistoryClick,
-                                    onRemoveClick = onRemoveHistory
-                                )
+                            items(state.modelList, key = { it.id }) { history ->
+                                Row(modifier = Modifier.animateItem()) {
+                                    SearchHistoryItem(
+                                        keyword = history.text,
+                                        onHistoryClick = onHistoryClick,
+                                        onRemoveClick = onRemoveHistory
+                                    )
+                                }
                             }
                         }
                     }
@@ -225,33 +229,36 @@ fun BoxScope.SearchResultContent(
             modifier = Modifier.fillMaxSize(),
         ) {
             items(state.modelList, key = { it.id }) { item ->
-                when (item) {
-                    is BookModel -> {
-                        BookItem(
-                            book = item,
-                            onClick = { onBookClick(item.isbn13, item.title) },
-                            onLikeClick = onLikeClick
-                        )
-                    }
+                Row(modifier = Modifier.animateItem()) {
+                    when (item) {
+                        is BookModel -> {
+                            BookItem(
+                                book = item,
+                                onClick = { onBookClick(item.isbn13, item.title) },
+                                onLikeClick = onLikeClick
+                            )
+                        }
 
-                    is BookLoadingModel -> {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) { CircularProgressIndicator() }
-                    }
+                        is BookLoadingModel -> {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .wrapContentSize()
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
+                            ) { CircularProgressIndicator() }
+                        }
 
-                    is BookLoadRetryModel -> {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "Error: ${item.errorMessage}")
-                            Button(onClick = onRetry) { Text("Retry") }
+                        is BookLoadRetryModel -> {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(text = "Error: ${item.errorMessage}")
+                                Button(onClick = onRetry) { Text("Retry") }
+                            }
                         }
                     }
                 }
