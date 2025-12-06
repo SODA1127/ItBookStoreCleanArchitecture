@@ -71,7 +71,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     Modifier.padding(16.dp),
                 hostState = snackState,
             ) { snackData ->
-                CustomSnackBarView(snackData.visuals.message)
+                CustomSnackBarView(message = snackData.visuals.message)
             }
         }
     ) { innerPadding ->

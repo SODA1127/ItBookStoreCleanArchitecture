@@ -1,5 +1,6 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.util
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -13,15 +14,20 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CustomSnackBarView(message: String) {
+fun CustomSnackBarView(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    message: String
+) {
     Card(
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Yellow.copy(alpha = 0.5f)),
+        colors =
+            CardDefaults.cardColors(containerColor = (if (darkTheme) Color.White else Color.Black).copy(alpha = 0.8f)),
     ) {
         Text(
             text = message,
             modifier = Modifier.padding(10.dp, 10.dp),
             textAlign = TextAlign.Center,
+            color = if (darkTheme) Color.Black else Color.White
         )
     }
 }
@@ -29,5 +35,8 @@ fun CustomSnackBarView(message: String) {
 @Preview(showBackground = true)
 @Composable
 fun CustomSnackBarViewPreview() {
-    CustomSnackBarView("Custom Snack Bar Message")
+    CustomSnackBarView(
+        true,
+        message = "Custom Snack Bar Message"
+    )
 }
