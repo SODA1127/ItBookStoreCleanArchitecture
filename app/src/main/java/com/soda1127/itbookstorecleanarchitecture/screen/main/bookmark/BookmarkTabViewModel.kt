@@ -22,7 +22,12 @@ class BookmarkTabViewModel @Inject constructor(
         viewModelScope.launch {
             bookStoreRepository.observeBookmarkStatus().collect { (isLiked, isbn) ->
                 withState<BookmarkState.Success> { state ->
-                    val updatedList = state.modelList.map { bookModel ->
+                    val modelList = state.modelList
+                    if (modelList.any { it.isbn13 == isbn }.not()) {
+                        fetchData()
+                        return@collect
+                    }
+                    val updatedList = modelList.map { bookModel ->
                         if (bookModel.isbn13 == isbn) {
                             bookModel.copy(isLiked = isLiked)
                         } else {
@@ -72,18 +77,6 @@ class BookmarkTabViewModel @Inject constructor(
                 } else {
                     bookStoreRepository.addBookInWishList(bookModel.toEntity())
                 }
-                setState(
-                    state.copy(
-                        modelList = state.modelList.toMutableList().apply {
-                            set(
-                                this.indexOf(bookModel),
-                                bookModel.copy(
-                                    isLiked = bookModel.isLiked?.not()
-                                )
-                            )
-                        }.toList()
-                    )
-                )
             }
         } catch (e: Exception) {
             e.printStackTrace()

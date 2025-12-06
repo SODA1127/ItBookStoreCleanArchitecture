@@ -12,6 +12,8 @@ import com.soda1127.itbookstorecleanarchitecture.data.response.BookStoreNewRespo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 
@@ -25,8 +27,11 @@ class TestBookStoreRepository : BookStoreRepository {
 
     private val booksInWishList = mutableListOf<BookEntity>()
 
+    private val _bookmarkStatusStateFlow = MutableSharedFlow<Pair<Boolean, String>>()
+    private val bookmarkStatusFlow: SharedFlow<Pair<Boolean, String>> = _bookmarkStatusStateFlow
+
     override fun observeBookmarkStatus(): Flow<Pair<Boolean, String>> {
-        return flow { emit(false to TEST_ISBN13) }
+        return bookmarkStatusFlow
     }
 
     override suspend fun getNewBooks(): Flow<List<BookEntity>> =
@@ -74,12 +79,14 @@ class TestBookStoreRepository : BookStoreRepository {
     override suspend fun addBookInWishList(bookEntity: BookEntity) {
         delay(100)
         booksInWishList.add(bookEntity)
+        _bookmarkStatusStateFlow.emit(true to bookEntity.isbn13)
     }
 
     override suspend fun removeBookInWishList(isbn13: String) =
         withContext(Dispatchers.Main) {
             delay(100)
             booksInWishList.remove(booksInWishList.find { it.isbn13 == isbn13 })
+            _bookmarkStatusStateFlow.emit(false to isbn13)
             return@withContext
         }
 

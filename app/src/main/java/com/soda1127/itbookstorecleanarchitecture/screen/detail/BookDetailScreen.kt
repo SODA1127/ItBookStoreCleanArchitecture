@@ -19,7 +19,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -86,32 +88,35 @@ fun BookDetailScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
-                navigationIcon = {
-                    IconButton(
-                        onClick = {
-                            // We need to save memo before back?
-                            // Activity logic: onBackPressed saves memo.
-                            // We can simulate this.
-                            // But here onBackClick just pops.
-                            // We should expose save method and call it.
-                            // For navigation icon, usually just back.
-                            // But requirement:
-                            // "saveMemo(binding.bookMemoInput.text.toString()) then
-                            // finish()"
-                            // Implementation below handles this in BackHandler or
-                            // explicit call.
-                            onBackClick()
+            Column(modifier = Modifier.fillMaxWidth()) {
+                TopAppBar(
+                    title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                // We need to save memo before back?
+                                // Activity logic: onBackPressed saves memo.
+                                // We can simulate this.
+                                // But here onBackClick just pops.
+                                // We should expose save method and call it.
+                                // For navigation icon, usually just back.
+                                // But requirement:
+                                // "saveMemo(binding.bookMemoInput.text.toString()) then
+                                // finish()"
+                                // Implementation below handles this in BackHandler or
+                                // explicit call.
+                                onBackClick()
+                            }
+                        ) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
                         }
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
-                        )
                     }
-                }
-            )
+                )
+                HorizontalDivider()
+            }
         }
     ) { innerPadding ->
         Box(
