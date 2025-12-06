@@ -6,7 +6,6 @@ import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
-import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity.Companion.KEY_ISBN13
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -23,7 +22,7 @@ class BookDetailViewModel @Inject constructor(
     private val _bookDetailStateFlow = MutableStateFlow<BookDetailState>(BookDetailState.Uninitialized)
     val bookDetailStateFlow: StateFlow<BookDetailState> = _bookDetailStateFlow
 
-    private val isbn13 by lazy { savedStateHandle.get<String>(KEY_ISBN13) }
+    private val isbn13 by lazy { savedStateHandle.get<String>("isbn13") }
 
     override fun fetchData(): Job = viewModelScope.launch {
         try {

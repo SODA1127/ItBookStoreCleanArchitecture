@@ -1,3 +1,0 @@
-package com.soda1127.itbookstorecleanarchitecture.widget.adapter.listener
-
-interface AdapterListener
