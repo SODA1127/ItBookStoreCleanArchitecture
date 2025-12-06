@@ -10,7 +10,8 @@ IT 도서 정보를 제공하는 안드로이드 애플리케이션으로, Clean
 
 ### Clean Architecture 적용
 
-이 프로젝트는 Clean Architecture의 3계층 구조를 따릅니다:
+``
+이 프로젝트는 Clean Ar``chitecture의 3계층 구조를 따릅니다:
 
 ```
 ┌─────────────────────────────────────┐
@@ -20,7 +21,7 @@ IT 도서 정보를 제공하는 안드로이드 애플리케이션으로, Clean
 │            Domain Layer             │
 │     (Use Cases, Entities, Models)   │
 ├─────────────────────────────────────┤
-│             Data Layer              │
+│             Data Layer          ``    │
 │  (Repositories, Data Sources, APIs) │
 └─────────────────────────────────────┘
 ```
@@ -30,38 +31,39 @@ IT 도서 정보를 제공하는 안드로이드 애플리케이션으로, Clean
 #### 1. Presentation Layer
 - **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/screen/`
 - **구성요소**:
-  - `BaseActivity`, `BaseFragment`, `BaseViewModel`: 기본 UI 컴포넌트
-  - `MainActivity`: 메인 화면 관리
-  - `BookDetailActivity`: 도서 상세 정보 화면
-  - 각 탭별 Fragment들 (New, Bookmark, Search)
-  - ViewModels: UI 상태 관리
+  - **Jetpack Compose**: 모든 UI는 Compose로 구현되어 있습니다.
+  - `BaseViewModel`: `StateFlow`를 기반으로 한 MVI 패턴의 상태 관리 공통 클래스
+  - `MainActivity`: 단일 진입점 Activity
+  - `BookDetailActivity`: 도서 상세 정보 화면 (Activity -> Composable 구조)
+  - **Composable Screens**: `BookNewScreen`, `BookmarkScreen`, `SearchScreen` 등
 
 #### 2. Data Layer
 - **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/data/`
 - **구성요소**:
-  - **Repository**: `BookSearchRepository`, `BookStoreRepository`, `BookMemoRepository`
-  - **API**: `BooksApiService` - 외부 API 통신
-  - **Database**: Room을 사용한 로컬 데이터베이스
-  - **Entity**: 데이터베이스 엔티티들
-  - **Response**: API 응답 모델들
+  - **Repository**: `BookSearchRepository`, `BookStoreRepository`, `BookMemoRepository` - 데이터 소스 통합 및 비즈니스 로직 처리
+  - **API**: `BooksApiService` - IT Bookstore API 통신
+  - **Database**: Room을 사용한 로컬 캐싱 및 북마크 저장소
+  - **Entity**: 로컬 DB 엔티티 (`BookEntity` 등)
+  - **Response**: API 응답 DTO
 
 #### 3. Domain Layer
 - **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/model/`
 - **구성요소**:
-  - `BookModel`: 도서 정보 모델
+  - `BookModel`: UI에서 사용하는 도서 데이터 모델 (좋아요 상태 포함)
   - `SearchHistoryModel`: 검색 기록 모델
   - `CellType`: UI 셀 타입 정의
 
 ## 기술 스택
 
 ### 주요 라이브러리
+
+- **UI**: Jetpack Compose (Material3)
+- **아키텍처**: Clean Architecture + MVVM + MVI
 - **의존성 주입**: Hilt
 - **네트워킹**: Retrofit + OkHttp
 - **데이터베이스**: Room
-- **비동기 처리**: Kotlin Coroutines + Flow
-- **이미지 로딩**: Glide
-- **JSON 파싱**: Gson
-- **UI**: ViewBinding
+- **비동기 처리**: Kotlin Coroutines + Flow + StateFlow
+- **이미지 로딩**: Glide (Compose Integration)
 
 ### 개발 도구
 - **언어**: Kotlin
@@ -91,9 +93,8 @@ app/src/main/java/com/soda1127/itbookstorecleanarchitecture/
 │   ├── detail/                    # 도서 상세 화면
 │   └── main/                      # 메인 화면
 ├── url/                           # URL 관리
-└── widget/                        # 커스텀 위젯
-    ├── adapter/                   # RecyclerView 어댑터
-    └── viewholder/                # ViewHolder들
+└── widget/                        # 공통 UI 위젯
+    └── item/                      # 재사용 가능한 Composable 아이템 (`BookItem` 등)
 ```
 
 ## 🧪 테스트 코드
@@ -130,29 +131,38 @@ app/src/test/java/com/soda1127/itbookstorecleanarchitecture/
 @InternalCoroutinesApi
 @ExperimentalCoroutinesApi
 @ObsoleteCoroutinesApi
-internal class MainViewModelTest: JUnit5Test() {
+internal class BookNewTabViewModelTest : JUnit5Test() {
 
-    private lateinit var sut: MainViewModel
+  private lateinit var sut: BookNewTabViewModel
+
+  @MockK
+  private lateinit var bookStoreRepository: BookStoreRepository
 
     @BeforeEach
     override fun setup() {
         super.setup()
-        sut = MainViewModel()
+      // Mocking required for BaseViewModel
+      every { bookStoreRepository.observeBookmarkStatus() } returns flow {}
+      sut = BookNewTabViewModel(bookStoreRepository)
     }
 
     @Test
-    fun `Test main tab navigation changed`() = runTest(UnconfinedTestDispatcher()) {
-        val first = MainNavigation(R.id.menu_new)
-        val second = MainNavigation(R.id.menu_bookmark)
-        sut.navigationItemStateFlow.test(this) {
+    fun `fetch Book List succeed`() = runTest(UnconfinedTestDispatcher()) {
+      // Given
+      val books = listOf(BookModel(...))
+      coEvery { bookStoreRepository.getNewBooks() } returns flowOf(books)
+
+      // Then
+      sut.stateFlow.test(TestScope()) {
             assertValues(
-                null,
-                first,
-                second
+              NewTabState.Uninitialized,
+              NewTabState.Loading,
+              NewTabState.Success(books)
             )
         }
-        sut.changeNavigation(first)
-        sut.changeNavigation(second)
+
+      // When
+      sut.fetchData()
     }
 }
 ```
@@ -186,8 +196,15 @@ internal class MainViewModelTest: JUnit5Test() {
 - 도서 상세 정보 표시
 - 도서 메모 작성 및 관리
 - PDF 다운로드 링크 제공
+- **좋아요(Like) 기능**: 하트 아이콘을 통해 관심 도서 등록/해제
 
-### 4. 검색 기록
+### 4. 실시간 상태 동기화 (Like Feature)
+
+- `NewBooks`, `Search`, `Bookmark`, `Detail` 전 화면에서 좋아요 상태가 실시간으로 동기화됩니다.
+- `combine`을 활용하여 도서 리스트 데이터와 로컬 북마크 데이터를 결합하여 최신 상태를 유지합니다.
+- `observeBookmarkStatus`를 통해 UI가 즉각적으로 반응합니다.
+
+### 5. 검색 기록
 - 최근 검색어 저장
 - 검색 기록 삭제
 - 검색 기록 기반 빠른 검색
