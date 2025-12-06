@@ -39,7 +39,7 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     // State from ViewModel
     val bottomNavItems = viewModel.bottomNavItems
 
-    val listState = rememberLazyListState()
+    val (newTabListState, searchTabListState, bookmarkTabListState) = bottomNavItems.map { rememberLazyListState() }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -57,9 +57,13 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     navController = navController,
                     currentDestination = currentDestination,
                     onTabSelected = { index -> viewModel.onTabSelected(index) },
-                    onScrollToTop = {
+                    onScrollToTop = { index ->
                         coroutineScope.launch {
-                            listState.animateScrollToItem(0)
+                            when (index) {
+                                0 -> newTabListState.animateScrollToItem(0)
+                                1 -> searchTabListState.animateScrollToItem(0)
+                                2 -> bookmarkTabListState.animateScrollToItem(0)
+                            }
                         }
                     }
                 )
@@ -67,19 +71,18 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
         },
         snackbarHost = {
             SnackbarHost(
-                modifier =
-                    Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp),
                 hostState = snackState,
-            ) { snackData ->
-                CustomSnackBarView(message = snackData.visuals.message)
-            }
+            ) { snackData -> CustomSnackBarView(message = snackData.visuals.message) }
         }
     ) { innerPadding ->
         MainNavHost(
             navController = navController,
             innerPadding = innerPadding,
             snackState = snackState,
-            listState = listState,
+            newTabListState = newTabListState,
+            searchTabListState = searchTabListState,
+            bookmarkTabListState = bookmarkTabListState,
         )
     }
 }

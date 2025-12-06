@@ -15,7 +15,9 @@ fun MainNavHost(
     navController: NavHostController,
     innerPadding: PaddingValues,
     snackState: SnackbarHostState,
-    listState: LazyListState
+    newTabListState: LazyListState,
+    searchTabListState: LazyListState,
+    bookmarkTabListState: LazyListState
 ) {
     val scope = rememberCoroutineScope()
     // Implementation goes here
@@ -25,7 +27,7 @@ fun MainNavHost(
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
             },
             paddingValues = innerPadding,
-            listState = listState,
+            listState = newTabListState,
         )
 
         bookSearchGraph(
@@ -33,7 +35,7 @@ fun MainNavHost(
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
             },
             paddingValues = innerPadding,
-            listState = listState,
+            listState = searchTabListState,
         )
 
         bookmarkGraph(
@@ -41,7 +43,7 @@ fun MainNavHost(
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
             },
             paddingValues = innerPadding,
-            listState = listState,
+            listState = bookmarkTabListState,
         )
 
         bookDetailGraph(

@@ -26,7 +26,7 @@ fun BottomNavigationBar(
     navController: NavHostController,
     currentDestination: NavDestination?,
     onTabSelected: (Int) -> Unit,
-    onScrollToTop: () -> Unit,
+    onScrollToTop: (Int) -> Unit,
 ) {
     NavigationBar {
         bottomNavItems.forEachIndexed { index, item ->
@@ -36,12 +36,8 @@ fun BottomNavigationBar(
                 selected = selected,
                 item = item,
                 navController = navController,
-                onTabSelected = {
-                    onTabSelected(index)
-                },
-                onScrollToTop = {
-                    onScrollToTop()
-                }
+                onTabSelected = { onTabSelected(index) },
+                onScrollToTop = { onScrollToTop(index) }
             )
         }
     }
@@ -86,8 +82,10 @@ fun BottomNavigationBarPreview() {
     val bottomNavItems = listOf(BottomNavItem.New, BottomNavItem.Search, BottomNavItem.Bookmark)
     BottomNavigationBar(
         bottomNavItems = bottomNavItems,
-        navController = rememberNavController(), // Keep navController for navigation logic in preview
-        currentDestination = null, // Set currentDestination to null for a generic preview without selection
+        navController =
+            rememberNavController(), // Keep navController for navigation logic in preview
+        currentDestination =
+            null, // Set currentDestination to null for a generic preview without selection
         onTabSelected = {},
         onScrollToTop = {},
     )
@@ -101,7 +99,8 @@ fun BottomNavigationBarItemPreview() {
         NavigationTabItem(
             selected = true,
             item = bottomNavItem,
-            navController = rememberNavController(), // Keep navController for navigation logic in
+            navController =
+                rememberNavController(), // Keep navController for navigation logic in
             onTabSelected = {},
             onScrollToTop = {}
         )
