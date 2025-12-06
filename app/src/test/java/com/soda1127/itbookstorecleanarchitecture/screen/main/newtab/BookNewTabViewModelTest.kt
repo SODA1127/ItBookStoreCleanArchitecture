@@ -25,6 +25,7 @@ class BookNewTabViewModelTest : JUnit5Test() {
     @BeforeEach
     override fun setup() {
         super.setup()
+        every { bookStoreRepository.observeBookmarkStatus() } returns flowOf(Pair(false, ""))
         viewModel = BookNewTabViewModel(bookStoreRepository)
     }
 

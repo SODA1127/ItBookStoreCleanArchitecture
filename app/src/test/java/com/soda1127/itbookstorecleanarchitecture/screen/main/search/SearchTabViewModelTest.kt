@@ -29,7 +29,8 @@ internal class SearchTabViewModelTest : JUnit5Test() {
 
     private lateinit var bookSearchRepository: BookSearchRepository
 
-    private val firstSearchResult = Gson().fromJson(BookSearchResponseJsonFirstPage, BookSearchResultResponse::class.java)
+    private val firstSearchResult =
+        Gson().fromJson(BookSearchResponseJsonFirstPage, BookSearchResultResponse::class.java)
 
     private val searchKeyword = TestBookStoreRepository.TEST_KEYWORD
 
@@ -44,34 +45,34 @@ internal class SearchTabViewModelTest : JUnit5Test() {
     }
 
     @Test
-    fun `Test Search Result`() = runTest(UnconfinedTestDispatcher()) {
-        sut.stateFlow.test(this) {
-            searchResultModelList.addAll(
-                firstSearchResult.books.map { book ->
-                    BookModel(
-                        id = book.isbn13,
-                        title = book.title,
-                        subtitle = book.subtitle,
-                        isbn13 = book.isbn13,
-                        price = book.price,
-                        image = book.image,
-                        url = book.url
-                    )
-                }
-            )
-            assertValues(
-                SearchTabState.Uninitialized,
-                SearchTabState.Loading,
-                SearchTabState.Success.SearchResult(
-                    searchResultModelList,
-                    searchKeyword,
-                    firstSearchResult.page,
-                    firstSearchResult.total.toInt()
+    fun `Test Search Result`() =
+        runTest(UnconfinedTestDispatcher()) {
+            sut.stateFlow.test(this) {
+                searchResultModelList.addAll(
+                    firstSearchResult.books.map { book ->
+                        BookModel(
+                            id = book.isbn13,
+                            title = book.title,
+                            subtitle = book.subtitle,
+                            isbn13 = book.isbn13,
+                            price = book.price,
+                            image = book.image,
+                            url = book.url,
+                            isLiked = false
+                        )
+                    }
                 )
-            )
-
+                assertValues(
+                    SearchTabState.Uninitialized,
+                    SearchTabState.Loading,
+                    SearchTabState.Success.SearchResult(
+                        searchResultModelList,
+                        searchKeyword,
+                        firstSearchResult.page,
+                        firstSearchResult.total.toInt()
+                    )
+                )
+            }
+            sut.searchByKeyword(searchKeyword)
         }
-        sut.searchByKeyword(searchKeyword)
-    }
-
 }
