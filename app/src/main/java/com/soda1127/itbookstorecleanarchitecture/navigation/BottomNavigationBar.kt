@@ -25,7 +25,6 @@ fun BottomNavigationBar(
     bottomNavItems: List<BottomNavItem>,
     navController: NavHostController,
     currentDestination: NavDestination?,
-    onTabIndexChange: (Int) -> Unit,
 ) {
     NavigationBar {
         bottomNavItems.forEachIndexed { index, item ->
@@ -33,9 +32,7 @@ fun BottomNavigationBar(
                 currentDestination?.hierarchy?.any { it.route == item.route.route } == true
             NavigationTabItem(
                 selected = selected,
-                index = index,
                 item = item,
-                onTabIndexChange = onTabIndexChange,
                 navController = navController,
             )
         }
@@ -45,9 +42,7 @@ fun BottomNavigationBar(
 @Composable
 fun RowScope.NavigationTabItem(
     selected: Boolean,
-    index: Int,
     item: BottomNavItem,
-    onTabIndexChange: (Int) -> Unit,
     navController: NavHostController,
 ) {
     NavigationBarItem(
@@ -62,7 +57,6 @@ fun RowScope.NavigationTabItem(
         selected = selected,
         onClick = {
             if (!selected) {
-                onTabIndexChange(index)
                 navController.navigate(item.route.route) {
                     popUpTo(navController.graph.findStartDestination().id) { saveState = true }
                     launchSingleTop = true
@@ -79,11 +73,8 @@ fun BottomNavigationBarPreview() {
     val bottomNavItems = listOf(BottomNavItem.New, BottomNavItem.Search, BottomNavItem.Bookmark)
     BottomNavigationBar(
         bottomNavItems = bottomNavItems,
-        navController =
-            rememberNavController(), // Keep navController for navigation logic in preview
-        currentDestination =
-            null, // Set currentDestination to null for a generic preview without selection
-        onTabIndexChange = {},
+        navController = rememberNavController(), // Keep navController for navigation logic in preview
+        currentDestination = null, // Set currentDestination to null for a generic preview without selection
     )
 }
 
@@ -91,16 +82,11 @@ fun BottomNavigationBarPreview() {
 @Composable
 fun BottomNavigationBarItemPreview() {
     val bottomNavItem = BottomNavItem.New
-    Row(
-        modifier = Modifier.wrapContentSize()
-    ) {
+    Row(modifier = Modifier.wrapContentSize()) {
         NavigationTabItem(
             selected = true,
-            index = 0,
             item = bottomNavItem,
-            onTabIndexChange = {},
             navController = rememberNavController(), // Keep navController for navigation logic in
-            // preview
         )
     }
 }

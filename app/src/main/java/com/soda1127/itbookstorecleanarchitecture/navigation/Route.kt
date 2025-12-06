@@ -22,6 +22,6 @@ fun getTabIndex(route: String?): Int {
         Route.New.route -> 0
         Route.Search.route -> 1
         Route.Bookmark.route -> 2
-        else -> -1
+        else -> if (route?.startsWith("detail") == true) 99 else -1
     }
 }

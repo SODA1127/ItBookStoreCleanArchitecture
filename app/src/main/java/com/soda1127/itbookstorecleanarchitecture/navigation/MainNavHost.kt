@@ -1,6 +1,5 @@
 package com.soda1127.itbookstorecleanarchitecture.navigation
 
-import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -9,11 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 
 @Composable
-fun MainNavHost(
-    navController: NavHostController,
-    innerPadding: PaddingValues,
-    forwardSlideDirection: AnimatedContentTransitionScope.SlideDirection
-) {
+fun MainNavHost(navController: NavHostController, innerPadding: PaddingValues) {
     // Implementation goes here
     NavHost(
         navController = navController,
@@ -23,22 +18,19 @@ fun MainNavHost(
         bookNewGraph(
             onBookClick = { isbn13, title ->
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
-            },
-            slideDirectionProvider = { forwardSlideDirection }
+            }
         )
 
-        searchGraph(
+        bookSearchGraph(
             onBookClick = { isbn13, title ->
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
-            },
-            slideDirectionProvider = { forwardSlideDirection }
+            }
         )
 
         bookmarkGraph(
             onBookClick = { isbn13, title ->
                 navController.navigate(Route.Detail.createRoute(isbn13, title))
-            },
-            slideDirectionProvider = { forwardSlideDirection }
+            }
         )
 
         bookDetailGraph(onBackClick = { navController.popBackStack() })

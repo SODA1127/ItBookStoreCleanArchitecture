@@ -7,7 +7,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.soda1127.itbookstorecleanarchitecture.navigation.BottomNavigationBar
@@ -27,7 +26,6 @@ class MainActivity : ComponentActivity() {
 fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
     val navController = rememberNavController()
     // State from ViewModel
-    val forwardSlideDirection by viewModel.forwardSlideDirection.collectAsStateWithLifecycle()
     val bottomNavItems = viewModel.bottomNavItems
 
     Scaffold(
@@ -43,15 +41,8 @@ fun MainScreen(viewModel: MainViewModel = hiltViewModel()) {
                     bottomNavItems = bottomNavItems,
                     navController = navController,
                     currentDestination = currentDestination,
-                    onTabIndexChange = { index -> viewModel.onTabSelected(index) },
                 )
             }
         }
-    ) { innerPadding ->
-        MainNavHost(
-            navController = navController,
-            innerPadding = innerPadding,
-            forwardSlideDirection = forwardSlideDirection
-        )
-    }
+    ) { innerPadding -> MainNavHost(navController = navController, innerPadding = innerPadding) }
 }
