@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -27,6 +26,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.soda1127.itbookstorecleanarchitecture.R
@@ -96,8 +96,12 @@ fun BookmarkItem(
                     onClick = { onLikeClick(book) },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    val iconRes = if (book.isLiked == true) R.drawable.ic_heart_enable else R.drawable.ic_heart_disable
-                    val tint = if (book.isLiked == true) Color.Red else Color.Gray
+                    val iconRes =
+                        if (book.isLiked == true) R.drawable.ic_heart_enable
+                        else R.drawable.ic_heart_disable
+                    val tint =
+                        if (book.isLiked == true) Color.Red
+                        else Color.Gray
                     Icon(
                         imageVector = ImageVector.vectorResource(id = iconRes),
                         contentDescription = "Like",
@@ -108,3 +112,23 @@ fun BookmarkItem(
         }
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+fun BookmarkItemPreview() {
+    BookmarkItem(
+        book = BookModel(
+            id = "1",
+            title = "Sample Book Title",
+            subtitle = "This is a sample subtitle for the book.",
+            isbn13 = "1234567890123",
+            price = "$29.99",
+            image = "",
+            url = "",
+            isLiked = true
+        ),
+        onClick = {},
+        onLikeClick = {}
+    )
+}
+

@@ -1,44 +1,53 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main
 
-import com.soda1127.itbookstorecleanarchitecture.screen.main.MainNavigation
-import com.soda1127.itbookstorecleanarchitecture.screen.main.MainViewModel
+import androidx.compose.animation.AnimatedContentTransitionScope.SlideDirection
 import com.soda1127.itbookstorecleanarchitecture.testbase.JUnit5Test
-import com.soda1127.itbookstorecleanarchitecture.R
-import dev.olog.flow.test.observer.test
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@InternalCoroutinesApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
-internal class MainViewModelTest: JUnit5Test() {
+class MainViewModelTest: JUnit5Test() {
 
-    private lateinit var sut: MainViewModel
+    private lateinit var viewModel: MainViewModel
 
     @BeforeEach
     override fun setup() {
-        super.setup()
-        sut = MainViewModel()
+        viewModel = MainViewModel()
     }
 
     @Test
-    fun `Test main tab navigation changed`() = runTest(UnconfinedTestDispatcher()) {
-        val first = MainNavigation(R.id.menu_new)
-        val second = MainNavigation(R.id.menu_bookmark)
-        sut.navigationItemStateFlow.test(this) {
-            assertValues(
-                null,
-                first,
-                second
-            )
-        }
-        sut.changeNavigation(first)
-        sut.changeNavigation(second)
+    fun `initial state is correct`() = runTest {
+        Assertions.assertEquals(0, viewModel.currentTabIndex.first())
+        Assertions.assertEquals(SlideDirection.Left, viewModel.forwardSlideDirection.first())
     }
 
+    @Test
+    fun `onTabSelected updates index and direction correctly when moving forward`() = runTest {
+        // Initial 0. Move to 1.
+        // 0 -> 1 : Should be Left (Enter from Right? Wait, let's check logic)
+        // Logic: if (currentIndex < index) SlideDirection.Left else SlideDirection.Right
+        // SlideDirection.Left means "Towards Left", i.e., entering from Right to Left.
+
+        viewModel.onTabSelected(1)
+
+        Assertions.assertEquals(1, viewModel.currentTabIndex.first())
+        Assertions.assertEquals(SlideDirection.Left, viewModel.forwardSlideDirection.first())
+    }
+
+    @Test
+    fun `onTabSelected updates index and direction correctly when moving backward`() = runTest {
+        // Move to 2 first
+        viewModel.onTabSelected(2)
+
+        // 2 -> 1 : Should be Right
+        // Logic: if (2 < 1) False -> SlideDirection.Right
+        // SlideDirection.Right means "Towards Right", i.e., entering from Left to Right.
+
+        viewModel.onTabSelected(1)
+
+        Assertions.assertEquals(1, viewModel.currentTabIndex.first())
+        Assertions.assertEquals(SlideDirection.Right, viewModel.forwardSlideDirection.first())
+    }
 }

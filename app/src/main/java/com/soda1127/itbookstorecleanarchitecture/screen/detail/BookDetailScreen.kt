@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -37,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -59,7 +61,7 @@ fun BookDetailScreen(
     LaunchedEffect(Unit) {
         viewModel.fetchData()
     }
-    
+
     // Handle SaveMemo state which triggers back in existing code.
     // In Compose, we might want to just show a toast or stay.
     // Logic said: saveMemo calls onBackPressedCallback.handleOnBackPressed().
@@ -73,7 +75,7 @@ fun BookDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(title, maxLines = 1) },
+                title = { Text(title, maxLines = 1, overflow = TextOverflow.Ellipsis) },
                 navigationIcon = {
                     IconButton(onClick = {
                         // We need to save memo before back?
@@ -84,19 +86,22 @@ fun BookDetailScreen(
                         // For navigation icon, usually just back.
                         // But requirement: "saveMemo(binding.bookMemoInput.text.toString()) then finish()"
                         // Implementation below handles this in BackHandler or explicit call.
-                         onBackClick()
+                        onBackClick()
                     }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
         }
     ) { innerPadding ->
-        Box(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+        Box(modifier = Modifier
+            .padding(innerPadding)
+            .fillMaxSize()) {
             when (val currentState = state) {
                 is BookDetailState.Loading -> {
-                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
+
                 is BookDetailState.Success -> {
                     BookDetailContent(
                         state = currentState,
@@ -104,6 +109,7 @@ fun BookDetailScreen(
                         onSaveMemo = { memo -> viewModel.saveMemo(memo) }
                     )
                 }
+
                 is BookDetailState.Error -> {
                     Column(modifier = Modifier.align(Alignment.Center), horizontalAlignment = Alignment.CenterHorizontally) {
                         Text("Error occurred")
@@ -112,6 +118,7 @@ fun BookDetailScreen(
                         }
                     }
                 }
+
                 else -> {}
             }
         }
@@ -142,23 +149,33 @@ fun BookDetailContent(
                     .clip(RoundedCornerShape(8.dp)),
                 contentScale = ContentScale.Crop
             )
-            
+
             Spacer(modifier = Modifier.size(16.dp))
-            
+
             Column {
-                Text(text = state.bookInfoEntity.title, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = state.bookInfoEntity.title,
+                    style = MaterialTheme.typography.titleLarge
+                )
                 Spacer(modifier = Modifier.height(4.dp))
-                Text(text = state.bookInfoEntity.subtitle, style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = state.bookInfoEntity.subtitle,
+                    style = MaterialTheme.typography.bodyMedium
+                )
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(text = state.bookInfoEntity.price, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Text(
+                    text = state.bookInfoEntity.price,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         // Like Button
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
-             IconButton(onClick = onLikeClick) {
+            IconButton(onClick = onLikeClick) {
                 val iconRes = if (state.isLiked) R.drawable.ic_heart_enable else R.drawable.ic_heart_disable
                 val tint = if (state.isLiked) Color.Red else Color.Gray
                 Icon(
@@ -170,7 +187,7 @@ fun BookDetailContent(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text("Memo", style = MaterialTheme.typography.titleMedium)
         OutlinedTextField(
             value = memoText,
@@ -178,9 +195,11 @@ fun BookDetailContent(
             modifier = Modifier.fillMaxWidth(),
             label = { Text("Enter memo") }
         )
-         Button(
+        Button(
             onClick = { onSaveMemo(memoText) },
-            modifier = Modifier.align(Alignment.End).padding(top = 8.dp)
+            modifier = Modifier
+                .align(Alignment.End)
+                .padding(top = 8.dp)
         ) {
             Text("Save & Exit")
         }
@@ -191,7 +210,7 @@ fun BookDetailContent(
         val infoText = remember(state.bookInfoEntity) {
             var text = ""
             BookInfoEntity::class.members.forEach { property ->
-                 if (property is KProperty<*>) {
+                if (property is KProperty<*>) {
                     try {
                         val value = property.call(state.bookInfoEntity)
                         text += "[${property.name}] : ${value}\n\n"
@@ -202,7 +221,7 @@ fun BookDetailContent(
             }
             text
         }
-        
+
         Text(text = infoText, style = MaterialTheme.typography.bodySmall)
     }
 }
