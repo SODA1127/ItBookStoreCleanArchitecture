@@ -25,6 +25,12 @@ class TestBookStoreRepository : BookStoreRepository {
 
     private val booksInWishList = mutableListOf<BookEntity>()
 
+    override fun observeBookmarkStatus(): Flow<Pair<Boolean, String>> {
+        return flow {
+            false to TEST_ISBN13
+        }
+    }
+
     override suspend fun getNewBooks(): Flow<List<BookEntity>> = withContext(Dispatchers.Main) {
         flow<List<BookEntity>> {
             delay(100)
