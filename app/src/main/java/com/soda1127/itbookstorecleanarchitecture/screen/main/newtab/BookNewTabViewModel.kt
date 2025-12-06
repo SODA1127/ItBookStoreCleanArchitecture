@@ -18,6 +18,24 @@ class BookNewTabViewModel @Inject constructor(
 
     override fun getInitialState(): NewTabState = NewTabState.Uninitialized
 
+    init {
+        viewModelScope.launch {
+            bookStoreRepository.observeBookmarkStatus()
+                .collect { (isLiked, isbn13) ->
+                    withState<NewTabState.Success> { state ->
+                        val updatedBooks = state.modelList.map { book ->
+                            if (book.isbn13 == isbn13) {
+                                book.copy(isLiked = isLiked)
+                            } else {
+                                book
+                            }
+                        }
+                        setState(NewTabState.Success(updatedBooks))
+                    }
+                }
+        }
+    }
+
     override fun fetchData(): Job =
         viewModelScope.launch {
             setState(NewTabState.Loading)

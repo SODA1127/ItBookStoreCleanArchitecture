@@ -11,12 +11,10 @@ import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.model.search.SearchHistoryModel
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
-import java.util.*
-import javax.inject.Inject
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.util.Date
+import javax.inject.Inject
 
 @HiltViewModel
 class SearchTabViewModel @Inject constructor(
@@ -34,10 +32,21 @@ class SearchTabViewModel @Inject constructor(
                 currentWishlist = wishlist
                 updateCurrentStateWithWishlist(wishlist)
             }
-            bookStoreRepository.observeBookmarkStatus().collect { (_, isbn13) ->
-                /*currentWishlist = updatedWishlist
-                updateCurrentStateWithWishlist(updatedWishlist)*/
-            }
+            bookStoreRepository.observeBookmarkStatus()
+                .collect { (isLiked, isbn13) ->
+                    withState<SearchTabState.Success.SearchResult> { state ->
+                        val updatedBooks = state.modelList.filterIsInstance<BookModel>().map { book ->
+                            if (book.isbn13 == isbn13) {
+                                book.copy(isLiked = isLiked)
+                            } else {
+                                book
+                            }
+                        }
+                        setState(
+                            state.copy(modelList = updatedBooks)
+                        )
+                    }
+                }
         }
     }
 
