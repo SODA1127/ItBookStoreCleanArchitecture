@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -206,10 +207,10 @@ fun BookDetailContent(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview(showBackground = true)
 @Composable
 fun BookDetailContentPreview() {
-    androidx.compose.material3.MaterialTheme {
+    MaterialTheme {
         BookDetailContent(
             state = BookDetailState.Success(
                 bookInfoEntity = BookInfoEntity(

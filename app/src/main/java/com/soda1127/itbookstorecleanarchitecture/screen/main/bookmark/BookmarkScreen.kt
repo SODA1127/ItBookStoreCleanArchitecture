@@ -17,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.soda1127.itbookstorecleanarchitecture.widget.item.BookmarkItem
@@ -80,7 +81,7 @@ fun BookmarkContent(
     }
 }
 
-@androidx.compose.ui.tooling.preview.Preview
+@Preview(showBackground = true)
 @Composable
 fun BookmarkContentPreview() {
     MaterialTheme {

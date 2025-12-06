@@ -68,7 +68,7 @@ fun BookNewContent(
     }
 }
 
-@Preview
+@Preview(showBackground = true)
 @Composable
 fun BookNewContentPreview() {
     MaterialTheme {
