@@ -29,13 +29,14 @@ IT 도서 정보를 제공하는 안드로이드 애플리케이션으로, Clean
 ### 계층별 구조
 
 #### 1. Presentation Layer
-- **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/screen/`
+
+- **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/screen/` & `navigation/`
 - **구성요소**:
   - **Jetpack Compose**: 모든 UI는 Compose로 구현되어 있습니다.
+  - **Single Activity**: `MainActivity`가 유일한 Activity이며, 모든 화면 전환은 Navigation Compose로 처리됩니다.
+  - **Navigation**: `MainNavHost`를 중심으로 `BookNewGraph`, `BookSearchGraph`, `BookmarkGraph`, `BookDetailGraph`가 구성되어 있습니다.
+  - **Screens**: `BookNewScreen`, `BookmarkScreen`, `SearchScreen`, `BookDetailScreen` (모두 Composable)
   - `BaseViewModel`: `StateFlow`를 기반으로 한 MVI 패턴의 상태 관리 공통 클래스
-  - `MainActivity`: 단일 진입점 Activity
-  - `BookDetailActivity`: 도서 상세 정보 화면 (Activity -> Composable 구조)
-  - **Composable Screens**: `BookNewScreen`, `BookmarkScreen`, `SearchScreen` 등
 
 #### 2. Data Layer
 - **위치**: `app/src/main/java/com/soda1127/itbookstorecleanarchitecture/data/`
@@ -88,10 +89,13 @@ app/src/main/java/com/soda1127/itbookstorecleanarchitecture/
 │   └── response/                  # API 응답 모델
 ├── extensions/                     # Kotlin 확장 함수
 ├── model/                         # 도메인 모델
+├── navigation/                    # Navigation Compose 그래프 및 라우트
 ├── screen/                        # UI 계층
+
 │   ├── base/                      # 기본 UI 컴포넌트
-│   ├── detail/                    # 도서 상세 화면
+│   ├── detail/                    # 도서 상세 화면 (Composable)
 │   └── main/                      # 메인 화면
+
 ├── url/                           # URL 관리
 └── widget/                        # 공통 UI 위젯
     └── item/                      # 재사용 가능한 Composable 아이템 (`BookItem` 등)
