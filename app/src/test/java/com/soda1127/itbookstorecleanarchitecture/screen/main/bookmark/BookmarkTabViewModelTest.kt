@@ -35,10 +35,10 @@ internal class BookmarkTabViewModelTest : JUnit5Test() {
         super.setup()
         bookStoreRepository = TestBookStoreRepository()
         sut = BookmarkTabViewModel(bookStoreRepository)
+        insertTestData()
     }
 
-    @BeforeEach
-    fun `Insert Test Data`() = runTest(UnconfinedTestDispatcher()) {
+    private fun insertTestData() = runTest(UnconfinedTestDispatcher()) {
         wishList.clear()
         bookStoreRepository.getBookInfo(TestBookStoreRepository.TEST_ISBN13).collect { bookInfo ->
             bookInfo?.let { book ->
@@ -61,7 +61,7 @@ internal class BookmarkTabViewModelTest : JUnit5Test() {
 
     @Test
     fun `Test data exist in wish list`() = runTest(UnconfinedTestDispatcher()) {
-        sut.bookmarkStateFlow.test(this) {
+        sut.stateFlow.test(this) {
             assertValues(
                 BookmarkState.Uninitialized,
                 BookmarkState.Loading,
@@ -87,12 +87,12 @@ internal class BookmarkTabViewModelTest : JUnit5Test() {
 
     @Test
     fun `Test Book Model toggle like button`() = runTest(UnconfinedTestDispatcher()) {
-        sut.bookmarkStateFlow.test(this) {
+        sut.stateFlow.test(this) {
             assertValues(
                 BookmarkState.Uninitialized,
                 BookmarkState.Loading,
                 BookmarkState.Success(listOf(bookModel)),
-                BookmarkState.Success(listOf(bookModel.copy(isLiked = false))),
+                BookmarkState.Success(listOf()),
             )
         }
         sut.fetchData()

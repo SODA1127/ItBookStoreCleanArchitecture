@@ -4,9 +4,10 @@ import com.soda1127.itbookstorecleanarchitecture.data.db.dao.BookInWishListDao
 import com.soda1127.itbookstorecleanarchitecture.data.di.api.BooksApiService
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookEntity
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -18,8 +19,13 @@ class DefaultBookStoreRepository @Inject constructor(
     private val bookInWishListDao: BookInWishListDao
 ): BookStoreRepository {
 
+    private val _bookmarkStatusStateFlow = MutableSharedFlow<Pair<Boolean, String>>()
+    private val bookmarkStatusFlow: SharedFlow<Pair<Boolean, String>> = _bookmarkStatusStateFlow
+
+    override fun observeBookmarkStatus(): Flow<Pair<Boolean, String>> = bookmarkStatusFlow
+
     override suspend fun getNewBooks(): Flow<List<BookEntity>> = withContext(Dispatchers.IO) {
-        flow<List<BookEntity>> {
+        flow {
             val booksResponse = booksApiService.getNewBooks()
             if (booksResponse.isSuccessful) {
                 emit(booksResponse.body()?.books ?: listOf())
@@ -55,10 +61,12 @@ class DefaultBookStoreRepository @Inject constructor(
 
     override suspend fun addBookInWishList(bookEntity: BookEntity) = withContext(Dispatchers.IO) {
         bookInWishListDao.insert(bookEntity)
+        _bookmarkStatusStateFlow.emit(Pair(true, bookEntity.isbn13))
     }
 
     override suspend fun removeBookInWishList(isbn13: String) = withContext(Dispatchers.IO) {
         bookInWishListDao.delete(isbn13)
+        _bookmarkStatusStateFlow.emit(Pair(false, isbn13))
     }
 
     override suspend fun searchBooksByKeyword(keyword: String, page: String?): Flow<Triple<List<BookEntity>, String?, Int?>> = withContext(Dispatchers.IO) {
@@ -70,7 +78,7 @@ class DefaultBookStoreRepository @Inject constructor(
                 booksApiService.searchBooksByKeywordWithPage(keyword, page)
             }
         }
-        flow<Triple<List<BookEntity>, String?, Int?>> {
+        flow {
             if (response.isSuccessful) {
                 val body = response.body()
                 emit(Triple(body?.books ?: listOf(), body?.page, body?.total?.toInt()))

@@ -1,9 +1,10 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.detail
 
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
+import com.soda1127.itbookstorecleanarchitecture.screen.base.State
 
 
-sealed class BookDetailState {
+sealed class BookDetailState: State {
 
     object Uninitialized: BookDetailState()
 

@@ -1,36 +1,27 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.detail
 
 import androidx.lifecycle.SavedStateHandle
-import com.google.gson.Gson
+import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
-import com.soda1127.itbookstorecleanarchitecture.data.json.BookInfoResponseJson
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
-import com.soda1127.itbookstorecleanarchitecture.data.repository.TestBookStoreRepository
-import com.soda1127.itbookstorecleanarchitecture.data.response.BookInfoResponse
-import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity.Companion.KEY_ISBN13
+import com.soda1127.itbookstorecleanarchitecture.data.repository.TestBookStoreRepository.Companion.TEST_ISBN13
 import com.soda1127.itbookstorecleanarchitecture.testbase.JUnit5Test
-import dev.olog.flow.test.observer.test
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.InternalCoroutinesApi
-import kotlinx.coroutines.ObsoleteCoroutinesApi
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import io.mockk.slot
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-@InternalCoroutinesApi
-@ExperimentalCoroutinesApi
-@ObsoleteCoroutinesApi
-internal class BookDetailViewModelTest: JUnit5Test() {
+class BookDetailViewModelTest : JUnit5Test() {
 
-    private lateinit var sut: BookDetailViewModel
-
+    @MockK
     private lateinit var bookStoreRepository: BookStoreRepository
 
     @MockK
@@ -39,125 +30,185 @@ internal class BookDetailViewModelTest: JUnit5Test() {
     @MockK
     private lateinit var savedStateHandle: SavedStateHandle
 
-    private val testMemoText = "testMemoText"
-    private val testBookEntity = Gson().fromJson(BookInfoResponseJson, BookInfoResponse::class.java).toEntity()
+    private lateinit var viewModel: BookDetailViewModel
 
     @BeforeEach
     override fun setup() {
         super.setup()
-        bookStoreRepository = TestBookStoreRepository()
-        every { savedStateHandle.get<String>(KEY_ISBN13) } returns TestBookStoreRepository.TEST_ISBN13
-        sut = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
-    }
-
-    @BeforeEach
-    fun `Insert Test Data`() = runTest(UnconfinedTestDispatcher()) {
-        bookStoreRepository.getBookInfo(TestBookStoreRepository.TEST_ISBN13).collect { bookInfo ->
-            bookInfo?.let {
-                bookStoreRepository.addBookInWishList(it.toBookEntity())
-            }
-        }
-    }
-
-    private fun setupMockBookMemoRepositoryReturnsNull() {
-        coEvery { bookMemoRepository.getBookMemo(TestBookStoreRepository.TEST_ISBN13) } returns flow {
-            emit(null)
-        }
-    }
-
-    private fun setupMockBookMemoRepositoryReturnsSavedMemo() {
-        coEvery { bookMemoRepository.getBookMemo(TestBookStoreRepository.TEST_ISBN13) } returns flow {
-            emit(
-                BookMemoEntity(
-                    isbn13 = TestBookStoreRepository.TEST_ISBN13,
-                    memo = testMemoText
-                )
-            )
-        }
-    }
-
-    private fun setupMockBookMemoRepositorySavedMemo() {
-        coEvery {
-            bookMemoRepository.saveBookMemo(
-                BookMemoEntity(
-                    isbn13 = TestBookStoreRepository.TEST_ISBN13,
-                    memo = testMemoText
-                )
-            )
-        } returns Unit
+        // Given
+        every { savedStateHandle.get<String>("isbn13") } returns TEST_ISBN13
     }
 
     @Test
-    fun `Test Fetch Data`() = runTest(UnconfinedTestDispatcher()) {
-        setupMockBookMemoRepositoryReturnsNull()
-        sut.bookDetailStateFlow.test(this) {
-            assertValues(
-                BookDetailState.Uninitialized,
-                BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
-                )
+    fun `fetchData combines streams correctly`() = runTest {
+        val bookInfo =
+            BookInfoEntity(
+                title = "Title",
+                subtitle = "Subtitle",
+                isbn13 = TEST_ISBN13,
+                price = "$10",
+                image = "img",
+                url = "url",
+                authors = "Authors",
+                publisher = "Publisher",
+                language = "English",
+                isbn10 = "1234567890",
+                pages = 100,
+                year = 2024,
+                rating = 4.5f,
+                desc = "Description",
+                pdf = null
             )
-        }
-        sut.fetchData()
+        val wishListBook = bookInfo.toBookEntity()
+        val bookMemo = BookMemoEntity(TEST_ISBN13, "My Memo")
+
+        coEvery { bookStoreRepository.getBookInWishList(TEST_ISBN13) } returns flowOf(wishListBook)
+        coEvery { bookStoreRepository.getBookInfo(TEST_ISBN13) } returns flowOf(bookInfo)
+        coEvery { bookMemoRepository.getBookMemo(TEST_ISBN13) } returns flowOf(bookMemo)
+
+        // Initialize ViewModel after mocks are ready (since fetchData might be called or we call it
+        // manually)
+        viewModel = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
+
+        // When
+        viewModel.fetchData()
+
+        // Then
+        val state = viewModel.stateFlow.value
+        assertTrue(state is BookDetailState.Success)
+        val successState = state as BookDetailState.Success
+
+        assertEquals(bookInfo, successState.bookInfoEntity)
+        assertEquals(true, successState.isLiked)
+        assertEquals("My Memo", successState.memo)
     }
 
     @Test
-    fun `Test Toggle Bookmark`() = runTest(UnconfinedTestDispatcher()) {
-        setupMockBookMemoRepositoryReturnsNull()
-        sut.bookDetailStateFlow.test(this) {
-            assertValues(
-                BookDetailState.Uninitialized,
-                BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
-                ),
-                BookDetailState.Success(
-                    testBookEntity,
-                    false,
-                    ""
-                )
+    fun `toggleLikeButton adds to wishlist if not liked`() = runTest {
+        // Setup initial success state with isLiked = false
+        val bookInfo =
+            BookInfoEntity(
+                title = "Title",
+                subtitle = "Subtitle",
+                isbn13 = TEST_ISBN13,
+                price = "$10",
+                image = "img",
+                url = "url",
+                authors = "Authors",
+                publisher = "Publisher",
+                language = "English",
+                isbn10 = "1234567890",
+                pages = 100,
+                year = 2024,
+                rating = 4.5f,
+                desc = "Description",
+                pdf = null
             )
-        }
-        sut.fetchData()
-        delay(100)
-        sut.toggleLikeButton()
+
+        // Mocking fetchData prerequisites to get into Success state
+        coEvery { bookStoreRepository.getBookInWishList(TEST_ISBN13) } returns flowOf(null) // Not in wishlist
+        coEvery { bookStoreRepository.getBookInfo(TEST_ISBN13) } returns flowOf(bookInfo)
+        coEvery { bookMemoRepository.getBookMemo(TEST_ISBN13) } returns flowOf(null)
+
+        viewModel = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
+        viewModel.fetchData() // Populate state
+
+        // Mock add action
+        coEvery { bookStoreRepository.addBookInWishList(any()) } returns Unit
+
+        // When
+        viewModel.toggleLikeButton()
+
+        // Then
+        coVerify(timeout = 1000) { bookStoreRepository.addBookInWishList(any()) }
+        val state = viewModel.stateFlow.value as BookDetailState.Success
+        assertEquals(true, state.isLiked)
     }
 
     @Test
-    fun `Test Save Memo`() = runTest(UnconfinedTestDispatcher()) {
-        setupMockBookMemoRepositoryReturnsNull()
-        sut.bookDetailStateFlow.test(this) {
-            assertValues(
-                BookDetailState.Uninitialized,
-                BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    ""
-                ),
-                BookDetailState.SaveMemo,
-                BookDetailState.Loading,
-                BookDetailState.Success(
-                    testBookEntity,
-                    true,
-                    testMemoText
-                )
+    fun `toggleLikeButton removes from wishlist if liked`() = runTest {
+        val bookInfo =
+            BookInfoEntity(
+                title = "Title",
+                subtitle = "Subtitle",
+                isbn13 = TEST_ISBN13,
+                price = "$10",
+                image = "img",
+                url = "url",
+                authors = "Authors",
+                publisher = "Publisher",
+                language = "English",
+                isbn10 = "1234567890",
+                pages = 100,
+                year = 2024,
+                rating = 4.5f,
+                desc = "Description",
+                pdf = null
             )
-        }
-        sut.fetchData()
-        delay(100)
+        val wishListBook = bookInfo.toBookEntity()
 
-        setupMockBookMemoRepositorySavedMemo()
-        sut.saveMemo(testMemoText)
+        // Mocking fetchData prerequisites to get into Success state (Already Liked)
+        coEvery { bookStoreRepository.getBookInWishList(TEST_ISBN13) } returns flowOf(wishListBook)
+        coEvery { bookStoreRepository.getBookInfo(TEST_ISBN13) } returns flowOf(bookInfo)
+        coEvery { bookMemoRepository.getBookMemo(TEST_ISBN13) } returns flowOf(null)
 
-        setupMockBookMemoRepositoryReturnsSavedMemo()
-        delay(100)
-        sut.fetchData()
+        viewModel = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
+        viewModel.fetchData()
+
+        // Mock remove action
+        coEvery { bookStoreRepository.removeBookInWishList(TEST_ISBN13) } returns Unit
+
+        // When
+        viewModel.toggleLikeButton()
+
+        // Then
+        coVerify(timeout = 1000) { bookStoreRepository.removeBookInWishList(TEST_ISBN13) }
+        val state = viewModel.stateFlow.value as BookDetailState.Success
+        assertEquals(false, state.isLiked)
     }
 
+    @Test
+    fun `saveMemo saves to repository and updates state`() = runTest {
+        // Mocks for initialization
+        coEvery { bookStoreRepository.getBookInWishList(TEST_ISBN13) } returns flowOf(null)
+        coEvery { bookStoreRepository.getBookInfo(TEST_ISBN13) } returns
+            flowOf(
+                BookInfoEntity(
+                    isbn13 = TEST_ISBN13,
+                    title = "T",
+                    subtitle = "",
+                    price = "",
+                    image = "",
+                    url = "",
+                    authors = "",
+                    publisher = "",
+                    language = "",
+                    isbn10 = "",
+                    pages = 0,
+                    year = 0,
+                    rating = 0f,
+                    desc = "",
+                    pdf = null
+                )
+            )
+        coEvery { bookMemoRepository.getBookMemo(TEST_ISBN13) } returns flowOf(null)
+
+        viewModel = BookDetailViewModel(bookStoreRepository, bookMemoRepository, savedStateHandle)
+        viewModel.fetchData()
+
+        val memoSlot = slot<BookMemoEntity>()
+        coEvery { bookMemoRepository.saveBookMemo(capture(memoSlot)) } returns Unit
+
+        // When
+        val memoText = "New Memo"
+        viewModel.saveMemo(memoText)
+
+        // Then
+        coVerify(timeout = 1000) { bookMemoRepository.saveBookMemo(any()) }
+        assertEquals(TEST_ISBN13, memoSlot.captured.isbn13)
+        assertEquals(memoText, memoSlot.captured.memo)
+
+        val state = viewModel.stateFlow.value
+        assertEquals(BookDetailState.SaveMemo, state)
+    }
 }

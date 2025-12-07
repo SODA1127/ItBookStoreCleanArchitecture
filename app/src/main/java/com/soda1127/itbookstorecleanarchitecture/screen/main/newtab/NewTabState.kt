@@ -1,8 +1,9 @@
 package com.soda1127.itbookstorecleanarchitecture.screen.main.newtab
 
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
+import com.soda1127.itbookstorecleanarchitecture.screen.base.State
 
-sealed class NewTabState {
+sealed class NewTabState: State {
 
     object Uninitialized: NewTabState()
 

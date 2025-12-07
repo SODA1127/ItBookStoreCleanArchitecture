@@ -6,7 +6,6 @@ import com.soda1127.itbookstorecleanarchitecture.data.entity.BookMemoEntity
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookMemoRepository
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
-import com.soda1127.itbookstorecleanarchitecture.screen.detail.BookDetailActivity.Companion.KEY_ISBN13
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.*
@@ -18,12 +17,11 @@ class BookDetailViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository,
     private val bookMemoRepository: BookMemoRepository,
     private val savedStateHandle: SavedStateHandle
-) : BaseViewModel() {
+) : BaseViewModel<BookDetailState, BookDetailEvent>() {
 
-    private val _bookDetailStateFlow = MutableStateFlow<BookDetailState>(BookDetailState.Uninitialized)
-    val bookDetailStateFlow: StateFlow<BookDetailState> = _bookDetailStateFlow
+    override fun getInitialState(): BookDetailState = BookDetailState.Uninitialized
 
-    private val isbn13 by lazy { savedStateHandle.get<String>(KEY_ISBN13) }
+    private val isbn13 by lazy { savedStateHandle.get<String>("isbn13") }
 
     override fun fetchData(): Job = viewModelScope.launch {
         try {
@@ -67,21 +65,24 @@ class BookDetailViewModel @Inject constructor(
 
     fun toggleLikeButton() = viewModelScope.launch {
         try {
-            when (val data = bookDetailStateFlow.value) {
-                is BookDetailState.Success -> {
-                    if (data.isLiked) {
-                        bookStoreRepository.removeBookInWishList(data.bookInfoEntity.isbn13)
-                    } else {
-                        bookStoreRepository.addBookInWishList(data.bookInfoEntity.toBookEntity())
-                    }
-                    setState(
-                        data.copy(
-                            isLiked = data.isLiked.not()
-                        )
-                    )
+            withState<BookDetailState.Success> { state ->
+                if (state.isLiked) {
+                    bookStoreRepository.removeBookInWishList(state.bookInfoEntity.isbn13)
+                } else {
+                    bookStoreRepository.addBookInWishList(state.bookInfoEntity.toBookEntity())
                 }
-
-                else -> Unit
+                setState(
+                    state.copy(
+                        isLiked = state.isLiked.not()
+                    )
+                )
+                sendEvent(
+                    BookDetailEvent.ShowToast(
+                        message =
+                            if (state.isLiked) "위시리스트에서 제거되었습니다."
+                            else "위시리스트에 추가되었습니다."
+                    )
+                )
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -92,25 +93,24 @@ class BookDetailViewModel @Inject constructor(
     }
 
     fun saveMemo(memo: String) = viewModelScope.launch {
-        isbn13?.let { isbn13 ->
-            bookMemoRepository.saveBookMemo(
-                BookMemoEntity(
-                    isbn13,
-                    memo
-                )
+        val isbn13 = isbn13 ?: run {
+            sendEvent(
+                BookDetailEvent.ShowToast(message = "저장할 수 없습니다")
             )
-            setState(
-                BookDetailState.SaveMemo
-            )
-        } ?: kotlin.run {
-            setState(
-                BookDetailState.SaveMemo
-            )
+            return@launch
         }
-    }
-
-    private fun setState(state: BookDetailState) {
-        _bookDetailStateFlow.value = state
+        bookMemoRepository.saveBookMemo(
+            BookMemoEntity(
+                isbn13,
+                memo
+            )
+        )
+        sendEvent(
+            BookDetailEvent.ShowToast(message = "메모가 저장되었습니다.")
+        )
+        setState(
+            BookDetailState.SaveMemo
+        )
     }
 
 }

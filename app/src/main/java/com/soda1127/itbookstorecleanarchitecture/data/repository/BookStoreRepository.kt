@@ -6,6 +6,8 @@ import kotlinx.coroutines.flow.Flow
 
 interface BookStoreRepository {
 
+    fun observeBookmarkStatus(): Flow<Pair<Boolean, String>>
+
     suspend fun getNewBooks(): Flow<List<BookEntity>>
 
     suspend fun getBookInfo(isbn13: String): Flow<BookInfoEntity?>

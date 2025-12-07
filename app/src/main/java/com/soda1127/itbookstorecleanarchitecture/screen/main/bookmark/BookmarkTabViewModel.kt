@@ -5,20 +5,44 @@ import com.soda1127.itbookstorecleanarchitecture.model.CellType
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.data.repository.BookStoreRepository
 import com.soda1127.itbookstorecleanarchitecture.screen.base.BaseViewModel
+import com.soda1127.itbookstorecleanarchitecture.screen.base.Event
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class BookmarkTabViewModel @Inject constructor(
     private val bookStoreRepository: BookStoreRepository
-): BaseViewModel() {
+) : BaseViewModel<BookmarkState, Event>() {
 
-    private val _bookmarkStateFlow = MutableStateFlow<BookmarkState>(BookmarkState.Uninitialized)
-    val bookmarkStateFlow: StateFlow<BookmarkState> = _bookmarkStateFlow
+    override fun getInitialState(): BookmarkState = BookmarkState.Uninitialized
+
+    init {
+        viewModelScope.launch {
+            bookStoreRepository.observeBookmarkStatus().collect { (isLiked, isbn) ->
+                withState<BookmarkState.Success> { state ->
+                    val modelList = state.modelList
+                    if (modelList.any { it.isbn13 == isbn }.not()) {
+                        fetchData()
+                        return@collect
+                    }
+                    val updatedList = modelList.map { bookModel ->
+                        if (bookModel.isbn13 == isbn) {
+                            bookModel.copy(isLiked = isLiked)
+                        } else {
+                            bookModel
+                        }
+                    }.filter { it.isLiked == true }
+                    setState(
+                        state.copy(
+                            modelList = updatedList
+                        )
+                    )
+                }
+            }
+        }
+    }
 
     override fun fetchData(): Job = viewModelScope.launch {
         setState(
@@ -47,36 +71,16 @@ class BookmarkTabViewModel @Inject constructor(
 
     fun toggleLikeButton(bookModel: BookModel) = viewModelScope.launch {
         try {
-            when (val data = bookmarkStateFlow.value) {
-                is BookmarkState.Success -> {
-                    if (bookModel.isLiked == true) {
-                        bookStoreRepository.removeBookInWishList(bookModel.isbn13)
-                    } else {
-                        bookStoreRepository.addBookInWishList(bookModel.toEntity())
-                    }
-                    setState(
-                        data.copy(
-                            modelList = data.modelList.toMutableList().apply {
-                                set(
-                                    this.indexOf(bookModel),
-                                    bookModel.copy(
-                                        isLiked = bookModel.isLiked?.not()
-                                    )
-                                )
-                            }.toList()
-                        )
-                    )
+            withState<BookmarkState.Success> { state ->
+                if (bookModel.isLiked == true) {
+                    bookStoreRepository.removeBookInWishList(bookModel.isbn13)
+                } else {
+                    bookStoreRepository.addBookInWishList(bookModel.toEntity())
                 }
-
-                else -> Unit
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }
-
-    private fun setState(state: BookmarkState) {
-        _bookmarkStateFlow.value = state
     }
 
 }

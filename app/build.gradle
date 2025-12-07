@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.parcelize)
 
+    alias(libs.plugins.kotlin.compose)
     id("de.mannodermaus.android-junit5") version "1.13.1.0"
 }
 
@@ -41,6 +42,9 @@ android {
     viewBinding {
         enabled true
     }
+    buildFeatures {
+        compose true
+    }
 
 }
 
@@ -48,8 +52,9 @@ dependencies {
 
     implementation libs.androidx.core.ktx
     implementation libs.androidx.appcompat
-    implementation libs.material
-    implementation libs.androidx.activity
+    implementation libs.kotlin.stdlib
+    implementation libs.kotlin.reflect
+    implementation libs.androidx.core.ktx
     implementation libs.androidx.constraintlayout
     implementation libs.androidx.viewbinding
     testImplementation libs.junit
@@ -112,6 +117,23 @@ dependencies {
     implementation libs.mockk
 
     testImplementation libs.flow.test.observer
+
+    // Compose
+    implementation platform(libs.androidx.compose.bom)
+    implementation libs.androidx.ui
+    implementation libs.androidx.ui.graphics
+    implementation libs.androidx.ui.tooling.preview
+    implementation libs.androidx.material3
+    implementation libs.androidx.activity.compose
+    implementation libs.androidx.lifecycle.runtime.compose
+    implementation libs.androidx.navigation.compose
+    implementation libs.androidx.hilt.navigation.compose
+    implementation libs.androidx.lifecycle.runtime.compose.v2100
+    implementation libs.coil.compose
+
+
+    debugImplementation libs.androidx.ui.tooling
+    debugImplementation libs.androidx.ui.test.manifest
 }
 
 
