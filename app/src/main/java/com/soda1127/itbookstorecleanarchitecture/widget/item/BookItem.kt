@@ -27,11 +27,13 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.model.book.BookModel
 import com.soda1127.itbookstorecleanarchitecture.ui.theme.ItBookStoreTheme
@@ -64,7 +66,10 @@ fun BookItem(
             .padding(16.dp)) {
             Row(modifier = Modifier.fillMaxWidth()) {
                 AsyncImage(
-                    model = book.image,
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(book.image)
+                        .crossfade(true)
+                        .build(),
                     contentDescription = book.title,
                     modifier = Modifier
                         .size(100.dp)

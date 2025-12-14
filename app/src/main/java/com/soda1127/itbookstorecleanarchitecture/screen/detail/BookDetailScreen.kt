@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -49,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.soda1127.itbookstorecleanarchitecture.R
 import com.soda1127.itbookstorecleanarchitecture.data.entity.BookInfoEntity
 import kotlin.reflect.KProperty
@@ -175,7 +177,10 @@ fun BookDetailContent(
                 .wrapContentSize()
         ) {
             AsyncImage(
-                model = state.bookInfoEntity.image,
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(state.bookInfoEntity.image)
+                    .crossfade(true)
+                    .build(),
                 contentDescription = null,
                 modifier = Modifier
                     .size(120.dp)
