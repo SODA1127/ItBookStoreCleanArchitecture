@@ -5,21 +5,24 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -29,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -162,122 +166,202 @@ fun BookDetailContent(
     onLikeClick: () -> Unit,
     onSaveMemo: (String) -> Unit
 ) {
-    val scrollState = rememberScrollState()
     var memoText by remember { mutableStateOf(state.memo) }
 
-    Column(
+    // Info Text reflection
+    val infoTexts: List<Pair<String, String>> =
+        remember(state.bookInfoEntity) {
+            val infoTextPairs = mutableListOf<Pair<String, String>>()
+            BookInfoEntity::class.members.forEach { property ->
+                if (property is KProperty<*>) {
+                    try {
+                        val value = property.call(state.bookInfoEntity)
+                        infoTextPairs.add(property.name to value.toString())
+                    } catch (e: Exception) {
+                        // Ignore
+                    }
+                }
+            }
+            infoTextPairs
+        }
+
+    val gridState = rememberLazyGridState()
+
+    LazyVerticalGrid(
+        state = gridState,
+        columns = GridCells.Adaptive(minSize = 180.dp),
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(scrollState)
-            .padding(16.dp)
+            .padding(horizontal = 16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentSize()
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(state.bookInfoEntity.image)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = null,
+        item(span = { GridItemSpan(maxLineSpan) }) {
+
+            Row(
                 modifier = Modifier
-                    .size(120.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
-            )
-
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(IntrinsicSize.Min)
-                        .heightIn(min = 120.dp)
+                    .fillMaxWidth()
+                    .wrapContentSize()
+                    .padding(top = 16.dp)
             ) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    Text(
-                        text = state.bookInfoEntity.title,
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
+                AsyncImage(
+                    model =
+                        ImageRequest.Builder(LocalContext.current)
+                            .data(state.bookInfoEntity.image)
+                            .crossfade(true)
+                            .build(),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentScale = ContentScale.Crop
+                )
 
-                    if (state.bookInfoEntity.subtitle.isNotEmpty()) {
+                Spacer(modifier = Modifier.size(16.dp))
+
+                Box(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .heightIn(min = 120.dp)
+                ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         Text(
-                            text = state.bookInfoEntity.subtitle,
-                            style = MaterialTheme.typography.bodyMedium
+                            text = state.bookInfoEntity.title,
+                            style = MaterialTheme.typography.titleLarge
                         )
-                    }
+                        Spacer(modifier = Modifier.height(4.dp))
 
-                    Spacer(modifier = Modifier.weight(1f))
-
-                    Box(modifier = Modifier.fillMaxWidth()) {
-                        Text(
-                            modifier = Modifier.align(Alignment.CenterStart),
-                            text = state.bookInfoEntity.price,
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-
-                        IconButton(
-                            onClick = onLikeClick,
-                            modifier = Modifier.align(Alignment.CenterEnd)
-                        ) {
-                            val iconRes =
-                                if (state.isLiked) R.drawable.ic_heart_enable
-                                else R.drawable.ic_heart_disable
-                            val tint = if (state.isLiked) Color.Red else Color.Gray
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = iconRes),
-                                contentDescription = "Like",
-                                tint = tint
+                        if (state.bookInfoEntity.subtitle.isNotEmpty()) {
+                            Text(
+                                text = state.bookInfoEntity.subtitle,
+                                style = MaterialTheme.typography.bodyMedium
                             )
+                        }
+
+                        Spacer(modifier = Modifier.weight(1f))
+
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                modifier = Modifier.align(Alignment.CenterStart),
+                                text = state.bookInfoEntity.price,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+
+                            IconButton(
+                                onClick = onLikeClick,
+                                modifier = Modifier.align(Alignment.CenterEnd)
+                            ) {
+                                val iconRes =
+                                    if (state.isLiked) R.drawable.ic_heart_enable
+                                    else R.drawable.ic_heart_disable
+                                val tint = if (state.isLiked) Color.Red else Color.Gray
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = iconRes),
+                                    contentDescription = "Like",
+                                    tint = tint
+                                )
+                            }
                         }
                     }
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(32.dp)) }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Column {
+                Text("Memo", style = MaterialTheme.typography.titleMedium)
+                OutlinedTextField(
+                    value = memoText,
+                    onValueChange = { memoText = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text("Enter memo") }
+                )
+                Button(
+                    onClick = { onSaveMemo(memoText) },
+                    modifier = Modifier
+                        .align(Alignment.End)
+                        .padding(top = 8.dp)
+                ) { Text("Save & Exit") }
+            }
+        }
 
-        Text("Memo", style = MaterialTheme.typography.titleMedium)
-        OutlinedTextField(
-            value = memoText,
-            onValueChange = { memoText = it },
-            modifier = Modifier.fillMaxWidth(),
-            label = { Text("Enter memo") }
-        )
-        Button(
-            onClick = { onSaveMemo(memoText) },
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = 8.dp)
-        ) { Text("Save & Exit") }
+        item(span = { GridItemSpan(maxLineSpan) }) { Spacer(modifier = Modifier.height(24.dp)) }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Info Text reflection
-        val infoText =
-            remember(state.bookInfoEntity) {
-                var text = ""
-                BookInfoEntity::class.members.forEach { property ->
-                    if (property is KProperty<*>) {
-                        try {
-                            val value = property.call(state.bookInfoEntity)
-                            text += "[${property.name}] : ${value}\n\n"
-                        } catch (e: Exception) {
-                            // Ignore
+        item(span = { GridItemSpan(maxLineSpan) }) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                infoTexts.chunked(2).forEach { rowItems ->
+                    HorizontalDivider(modifier = Modifier.fillMaxWidth())
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                    ) {
+                        rowItems.forEachIndexed { index, textInfo ->
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .weight(1f)
+                                        .fillMaxHeight()
+                                        .padding(horizontal = 8.dp)
+                            ) { TitleAndInfo(textInfo) }
+                            if (index < rowItems.size - 1) {
+                                VerticalDivider(
+                                    modifier = Modifier
+                                        .fillMaxHeight()
+                                        .width(1.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant
+                                )
+                            } else if (rowItems.size == 1) {
+                                // For odd number of items, add a spacer to fill the right column
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
-                text
+                HorizontalDivider(modifier = Modifier.fillMaxWidth())
             }
+        }
+    }
+}
 
-        Text(text = infoText, style = MaterialTheme.typography.bodySmall)
+@Composable
+fun TitleAndInfo(textInfo: Pair<String, String>) {
+    val (title, infoText) = textInfo
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentSize()
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = Color.Black,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = infoText,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.DarkGray,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun TitleAndInfoPreview() {
+    MaterialTheme {
+        TitleAndInfo(
+            textInfo =
+                "Title" to
+                    "Test Test Test Test Test Test Test Test Test Test Test Test Test Test "
+        )
     }
 }
 
@@ -286,28 +370,30 @@ fun BookDetailContent(
 fun BookDetailContentPreview() {
     MaterialTheme {
         BookDetailContent(
-            state = BookDetailState.Success(
-                bookInfoEntity =
-                    BookInfoEntity(
-                        title = "Preview Title",
-                        subtitle = "Preview Subtitle",
-                        price = "$10.00",
-                        image = "",
-                        isbn13 = "1234567890123",
-                        desc = "Description",
-                        isbn10 = "1234567890",
-                        pages = 100,
-                        year = 2024,
-                        rating = 4.5f,
-                        url = "url",
-                        authors = "Author",
-                        language = "English",
-                        publisher = "Publisher",
-                        pdf = null
-                    ),
-                memo = "My Memo",
-                isLiked = true
-            ),
+            state =
+                BookDetailState.Success(
+                    bookInfoEntity =
+                        BookInfoEntity(
+                            title = "Preview Title",
+                            subtitle = "Preview Subtitle",
+                            price = "$10.00",
+                            image = "",
+                            isbn13 = "1234567890123",
+                            desc =
+                                "DescriptionDescriptionDescriptionDescriptionDescriptionDescriptionDescription",
+                            isbn10 = "1234567890",
+                            pages = 100,
+                            year = 2024,
+                            rating = 4.5f,
+                            url = "url",
+                            authors = "Author",
+                            language = "English",
+                            publisher = "Publisher",
+                            pdf = null
+                        ),
+                    memo = "My Memo",
+                    isLiked = true
+                ),
             onLikeClick = {},
             onSaveMemo = {}
         )
