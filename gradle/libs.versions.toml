@@ -24,6 +24,7 @@ activity = "1.9.0"
 constraintlayout = "2.1.4"
 mockk = "1.13.5"
 multidex = "2.0.1"
+composeCollapsingToolbar = "2.3.5"
 
 
 androidx-room = "2.6.1"
@@ -110,6 +111,7 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
 coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coil" }
+compose-collapsing-toolbar = { module = "me.onebone:toolbar-compose", version.ref = "composeCollapsingToolbar" }
 
 
 [bundles]
