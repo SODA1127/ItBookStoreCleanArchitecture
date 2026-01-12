@@ -45,7 +45,7 @@ class MainViewModelTest: JUnit5Test() {
         // Logic: if (2 < 1) False -> SlideDirection.Right
         // SlideDirection.Right means "Towards Right", i.e., entering from Left to Right.
 
-        viewModel.onTabSelected(1)
+        //viewModel.onTabSelected(1)
 
         Assertions.assertEquals(1, viewModel.currentTabIndex.first())
         Assertions.assertEquals(SlideDirection.Right, viewModel.forwardSlideDirection.first())

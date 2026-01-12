@@ -47,6 +47,7 @@ internal class SearchTabViewModelTest : JUnit5Test() {
     @Test
     fun `Test Search Result`() =
         runTest(UnconfinedTestDispatcher()) {
+            // Assert
             sut.stateFlow.test(this) {
                 searchResultModelList.addAll(
                     firstSearchResult.books.map { book ->
@@ -73,6 +74,8 @@ internal class SearchTabViewModelTest : JUnit5Test() {
                     )
                 )
             }
+
+            // Act
             sut.searchByKeyword(searchKeyword)
         }
 }
